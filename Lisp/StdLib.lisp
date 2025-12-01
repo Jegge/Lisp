@@ -5,7 +5,7 @@
 (define-macro identity (lambda (x) x))
 
 ; flips the order of positional arguments
-(define flip (lambda (func) (lamda (arg1 arg2) (func arg2 arg1))))
+(define flip (lambda (func) (lambda (arg1 arg2) (func arg2 arg1))))
 
 ; partially applies a function
 (define curry (lambda (func arg1) (lambda (arg) (apply func (cons arg1 (list arg))))))
