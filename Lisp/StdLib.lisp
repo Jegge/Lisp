@@ -80,17 +80,26 @@
 (define true? (curry = true))
 
 (define file-read-content (lambda (filepath) 
-    (let (p (file-open-read filepath)) (do
-        (define c (file-read p))
-        (file-close p)
-        c)
-    )))  
+    (let (p (file-open-read filepath)) 
+        (try (do
+            (define c (file-read p))
+            (file-close p)
+            c)
+        (catch e (do 
+            (file-close p)
+            (throw e))
+        ))
+    )))
 
 (define file-write-content (lambda (filepath content) 
-    (let (p (file-open-write filepath)) (do
-        (file-write p content)
-        (file-close p)
-        )
+    (let (p (file-open-write filepath)) 
+        (try (do
+            (file-write p content)
+            (file-close p))
+        (catch e (do 
+            (file-close p)
+            (throw e))
+        ))
     )))
 
 (define load-file (lambda (f) (eval (read (strcat "(do " (file-read-content f) "\nnil)")))))
