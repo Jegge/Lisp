@@ -22,9 +22,7 @@ public sealed class LispEnvironment
 
     public TextWriter? Output { get; init; }
 
-    public LispEnvironment (LispAccess access = LispAccess.None) : this([], access)
-    {
-    }
+    public LispEnvironment (LispAccess access = LispAccess.None) : this([], access) { }
 
     public LispEnvironment (string[] argc, LispAccess access = LispAccess.None)
     {
@@ -68,8 +66,8 @@ public sealed class LispEnvironment
             ["mod"] = LispPrimitive.Define("mod", (lhs, rhs) => lhs % rhs),
 
             // Boolean operators
-            ["and"] = LispPrimitive.Define("or", (lhs, rhs) => lhs && rhs),
-            ["or"] = LispPrimitive.Define("and", (lhs, rhs) => lhs || rhs),
+            ["&&"] = LispPrimitive.Define("&&", (lhs, rhs) => lhs && rhs),
+            ["||"] = LispPrimitive.Define("||", (lhs, rhs) => lhs || rhs),
 
             // Equality & numerical comparison
             ["="] = LispPrimitive.Define("=", (LispEnvironment _, LispValue lhs, LispValue rhs) => new LispBool(lhs.Equals(rhs))),
@@ -139,7 +137,7 @@ public sealed class LispEnvironment
             ["symbol"] = LispPrimitive.Define("symbol", (LispEnvironment _, LispString name) => new LispSymbol(name.Value)),
             ["keyword"] = LispPrimitive.Define("keyword", (LispEnvironment _, LispString name) => new LispKeyword(name.Value)),
 
-            // Core Read / Eval / Print / Apply functions
+            // Core read / eval / print / apply functions
             ["read"] = LispPrimitive.Define("read", (LispEnvironment _, LispString content) => LispValue.Read(content.Value)),
             ["eval"] = LispPrimitive.Define("eval", (LispEnvironment _, LispValue value) => value.Eval(this)), // always evaluate in the root environment
             ["print"] = LispPrimitive.DefineVarArg("print", (_, seq) => new LispString(string.Join(' ', seq.Values.Select(a => a.Print(true))))),

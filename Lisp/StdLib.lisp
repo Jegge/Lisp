@@ -50,8 +50,10 @@
 
 (define sum (lambda (sequence) (fold + 0 sequence)))
 (define product (lambda (sequence) (fold * 1 sequence)))
-(define all (lambda (sequence) (fold and true sequence)))
-(define any (lambda (sequence) (fold or false sequence)))
+(define and (lambda (sequence) (fold && true sequence)))
+(define or (lambda (sequence) (fold || false sequence)))
+(define any? (lambda (pred sequence) (or (map pred sequence))))
+(define every? (lambda (pred sequence) (and (map pred sequence))))
 
 (define map (lambda (func sequence) (foldr (lambda (x y) (cons (func x) y)) '() sequence)))
 (define filter (lambda (pred sequence) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() sequence)))
@@ -72,8 +74,8 @@
 (define list? (lambda (x) (= (type-of x) 'list)))
 (define vector? (lambda (x) (= (type-of x) 'vector)))
 (define hashmap? (lambda (x) (= (type-of x) 'hashmap)))
-(define sequential? (lambda (x) (or (list? x) (vector? x))))
-(define container? (lambda (x) (any ((list? x) (vector? x) (hashmap? x)))))
+(define sequential? (lambda (x) (or (list (list? x) (vector? x)))))
+(define container? (lambda (x) (or (list (list? x) (vector? x) (hashmap? x)))))
 (define false? (curry = false))
 (define true? (curry = true))
 
@@ -97,7 +99,7 @@
 (define range (lambda (start stop step)
     (if (= step 0) 
         (throw "step can not be 0")
-        (if (or (and (> step 0) (< start stop)) (and (< step 0) (> start stop)))
+        (if (|| (&& (> step 0) (< start stop)) (&& (< step 0) (> start stop)))
             (cons start (range (+ start step) stop step)) 
             (list))
     )))
