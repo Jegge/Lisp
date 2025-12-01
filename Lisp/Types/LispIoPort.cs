@@ -26,7 +26,15 @@ public class LispIoPort : LispValue, IDisposable
     }
 
     public string? Read () => _reader?.ReadToEnd();
-    public void Write (string value) =>  _writer?.Write(value);
+    public bool Write (string value)
+    {
+        if (_writer is null)
+            return false;
+        _writer.Write(value);
+        _writer.Flush();
+        return true;
+    }
+
     public bool Close ()
     {
         if (_reader != null && _reader != Console.In)

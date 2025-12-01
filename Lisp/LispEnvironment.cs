@@ -166,12 +166,8 @@ public sealed class LispEnvironment
             ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
             ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
                 access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : new LispNil()) : throw new AccessDeniedException(LispAccess.ReadFiles)),
-            ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) => {
-                if (!access.HasFlag(LispAccess.WriteFiles))
-                    throw new AccessDeniedException(LispAccess.WriteFiles);
-                port.Write(value.Value);
-                return new LispNil();
-            }),
+            ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) =>
+                !access.HasFlag(LispAccess.WriteFiles) ? throw new AccessDeniedException(LispAccess.WriteFiles) : new LispBool(port.Write(value.Value))),
 
             // System functions
             ["prn"] = LispPrimitive.DefineVarArg("prn", (_, seq) =>

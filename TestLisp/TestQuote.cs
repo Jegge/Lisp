@@ -1,6 +1,6 @@
-﻿namespace TestLisp;
+﻿using Lisp;
 
-using Lisp;
+namespace TestLisp;
 
 [TestClass]
 public sealed class TestQuote

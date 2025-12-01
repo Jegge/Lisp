@@ -1,6 +1,6 @@
-﻿namespace TestLisp;
+﻿using Lisp;
 
-using Lisp;
+namespace TestLisp;
 
 [TestClass]
 public sealed class TestEvaluate
@@ -26,7 +26,6 @@ public sealed class TestEvaluate
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
-
 
     [TestMethod]
     [DataRow("()", "()")]
@@ -74,4 +73,11 @@ public sealed class TestEvaluate
         Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
     }
 
+    [TestMethod]
+    public void EvalUsesGlobalEnvironment ()
+    {
+        var sut = new LispEnvironment();
+        Assert.AreEqual("1", sut.ReadEvaluatePrint("(define a 1)"));
+        Assert.AreEqual("1", sut.ReadEvaluatePrint("(let (a 2) (eval (read \"a\")))"));
+    }
 }

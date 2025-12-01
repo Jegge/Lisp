@@ -1,26 +1,11 @@
 ﻿using Lisp.Types;
+using Lisp;
 
 namespace TestLisp;
-
-using Lisp;
 
 [TestClass]
 public sealed class TestFileIO
 {
-    [TestMethod]
-    [DataRow("(read \"(1 2 (3 4) nil)\")", "(1 2 (3 4) nil)")]
-    [DataRow("(= nil (read \"nil\"))", "true")]
-    [DataRow("(read \"(+ 2 3)\")", "(+ 2 3)")]
-    [DataRow("(read \"\\\"\\n\\\"\")", "\"\\n\"")]
-    [DataRow("(read \"7 ;; comment\")", "7")]
-    //[DataRow("", "")]
-    //[DataRow("", "")]
-    public void ReadString (string input, string expected)
-    {
-        var sut = new LispEnvironment(LispAccess.ReadFiles);
-        Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
     [TestMethod]
     public void UnexpectedEndOfFileException ()
     {
@@ -31,16 +16,32 @@ public sealed class TestFileIO
     [DataRow("./Testfiles/test.txt")]
     [DataRow("./Testfiles/test.txt")]
     [DataRow("./Testfiles/test1.lisp")]
-    public void Slurp (string filepath)
+    public void FileReadContent (string filepath)
     {
         var expected = $"\"{LispString.Escape(File.ReadAllText(filepath))}\"";
-        Assert.AreEqual(expected, new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint($"(slurp \"{LispString.Escape(filepath)}\")"), "input:<{0}>", filepath);
+        Assert.AreEqual(expected, new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint($"(file-read-content \"{LispString.Escape(filepath)}\")"), "input:<{0}>", filepath);
     }
 
     [TestMethod]
-    public void SlurpAccessDeniedException ()
+    public void FileReadContentAccessDeniedException ()
     {
-        Assert.ThrowsException<AccessDeniedException>(() => new LispEnvironment().ReadEvaluatePrint("(slurp \"blubb\")"));
+        Assert.ThrowsException<AccessDeniedException>(() => new LispEnvironment().ReadEvaluatePrint("(file-read-content \"blubb\")"));
+    }
+
+    [TestMethod]
+    public void FileWriteContent ()
+    {
+        const string filepath = "./temp.txt";
+        const string data = "Das ist ein Test!\n";
+        Assert.AreEqual("true", new LispEnvironment(LispAccess.WriteFiles).ReadEvaluatePrint($"(file-write-content \"{LispString.Escape(filepath)}\" \"{LispString.Escape(data)}\")"), "input:<{0}>", filepath);
+        Assert.AreEqual("\"Das ist ein Test!\\n\"", new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint($"(file-read-content \"{LispString.Escape(filepath)}\")"), "input:<{0}>", filepath);
+        File.Delete(filepath);
+    }
+
+    [TestMethod]
+    public void FileWriteContentAccessDeniedException ()
+    {
+        Assert.ThrowsException<AccessDeniedException>(() => new LispEnvironment().ReadEvaluatePrint("(file-write-content \"blubb\" \"blubb\")"));
     }
 
     [TestMethod]
@@ -49,16 +50,7 @@ public sealed class TestFileIO
     {
         var sut = new LispEnvironment(LispAccess.ReadFiles);
         sut.LoadFile(filepath);
-
         Assert.AreEqual("6", sut.ReadEvaluatePrint("(inc4 2)"));
         Assert.AreEqual("8", sut.ReadEvaluatePrint("(inc5 3)"));
-    }
-
-    [TestMethod]
-    public void EvalUsesGlobalEnvironment ()
-    {
-        var sut = new LispEnvironment();
-        Assert.AreEqual("1", sut.ReadEvaluatePrint("(define a 1)"));
-        Assert.AreEqual("1", sut.ReadEvaluatePrint("(let (a 2) (eval (read \"a\")))"));
     }
 }

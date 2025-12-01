@@ -77,14 +77,27 @@
 (define false? (curry = false))
 (define true? (curry = true))
 
-(define file-content (lambda (f) (file-read (file-open-read f))))
-(define load-file (lambda (f) (eval (read (strcat "(do " (file-read (file-open-read f)) "\nnil)")))))
+(define file-read-content (lambda (filepath) 
+    (let (p (file-open-read filepath)) (do
+        (define c (file-read p))
+        (file-close p)
+        c)
+    )))  
+
+(define file-write-content (lambda (filepath content) 
+    (let (p (file-open-write filepath)) (do
+        (file-write p content)
+        (file-close p)
+        )
+    )))
+
+(define load-file (lambda (f) (eval (read (strcat "(do " (file-read-content f) "\nnil)")))))
 
 ; creates a list from start (inclusive) to stop (not inclusive)
 (define range (lambda (start stop step)
     (if (= step 0) 
         (throw "step can not be 0")
-        (if (or (and (> step 0) (< start stop))    (and (< step 0) (> start stop)))
+        (if (or (and (> step 0) (< start stop)) (and (< step 0) (> start stop)))
             (cons start (range (+ start step) stop step)) 
             (list))
     )))

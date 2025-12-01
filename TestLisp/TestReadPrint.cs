@@ -1,9 +1,8 @@
-﻿using Lisp.Parser;
+﻿using Lisp;
+using Lisp.Parser;
 using Lisp.Types;
 
 namespace TestLisp;
-
-using Lisp;
 
 [TestClass]
 public sealed class TestReadPrint
@@ -24,6 +23,19 @@ public sealed class TestReadPrint
 
         foreach (var (expected, token) in output.Zip(tokens))
             Assert.AreEqual(expected, token.Value);
+    }
+
+    [TestMethod]
+    [DataRow("(read \"(1 2 (3 4) nil)\")", "(1 2 (3 4) nil)")]
+    [DataRow("(= nil (read \"nil\"))", "true")]
+    [DataRow("(read \"(+ 2 3)\")", "(+ 2 3)")]
+    [DataRow("(read \"\\\"\\n\\\"\")", "\"\\n\"")]
+    [DataRow("(read \"7 ;; comment\")", "7")]
+    //[DataRow("", "")]
+    //[DataRow("", "")]
+    public void ReadString (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
 
     [TestMethod]

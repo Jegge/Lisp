@@ -1,6 +1,6 @@
-﻿namespace TestLisp;
+﻿using Lisp;
 
-using Lisp;
+namespace TestLisp;
 
 [TestClass]
 public sealed class TestTryCatch
@@ -23,7 +23,6 @@ public sealed class TestTryCatch
     }
 
     [TestMethod]
-
     public void Throw ()
     {
         Assert.ThrowsException<RuntimeException>(() => new LispEnvironment().ReadEvaluatePrint("(throw \"test\")"));
