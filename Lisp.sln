@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLisp", "TestLisp\TestLisp.csproj", "{63E2788D-562A-476B-9B13-9B9EAA7AD116}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LispTest", "LispTest\LispTest.csproj", "{63E2788D-562A-476B-9B13-9B9EAA7AD116}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LispRepl", "LispRepl\LispRepl.csproj", "{0B1CA61F-A556-41B7-8323-B9F4552EE534}"
 EndProject

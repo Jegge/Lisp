@@ -2,7 +2,7 @@
 using Lisp.Parser;
 using Lisp.Types;
 
-namespace TestLisp;
+namespace LispTest;
 
 [TestClass]
 public sealed class TestReadPrint

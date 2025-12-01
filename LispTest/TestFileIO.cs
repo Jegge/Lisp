@@ -1,7 +1,7 @@
 ﻿using Lisp.Types;
 using Lisp;
 
-namespace TestLisp;
+namespace LispTest;
 
 [TestClass]
 public sealed class TestFileIO

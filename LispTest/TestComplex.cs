@@ -1,6 +1,6 @@
 ﻿using Lisp;
 
-namespace TestLisp;
+namespace LispTest;
 
 [TestClass]
 public sealed class TestComplex

@@ -1,6 +1,6 @@
 ﻿using Lisp;
 
-namespace TestLisp;
+namespace LispTest;
 
 [TestClass]
 public sealed class TestMacro
@@ -11,7 +11,7 @@ public sealed class TestMacro
     [DataRow("(define-macro unless (lambda (pred a b) `(if ~pred ~b ~a)))", new[] { "(unless false 7 8)", "(unless true 7 8)" }, new[] { "7", "8" })]
     [DataRow("(define-macro unless (lambda (pred a b) (list 'if (list 'not pred) a b)))", new[] { "(unless false 7 8)", "(unless true 7 8)" }, new[] { "7", "8" })]
     [DataRow("(define-macro identity (lambda (x) x))", new[] { "(let (a 23) (identity a))" }, new[] { "23" })]
-    public void DefineMacro(string macro, string[] input, string[] expected)
+    public void DefineMacro (string macro, string[] input, string[] expected)
     {
         var sut = new LispEnvironment();
         sut.ReadEvaluatePrint(macro);
@@ -33,7 +33,5 @@ public sealed class TestMacro
         Assert.AreEqual("(lambda () x)", sut.ReadEvaluatePrint("(define-macro a (lambda [] x))"));
         Assert.AreEqual("2", sut.ReadEvaluatePrint("(a)"));
         Assert.AreEqual("2", sut.ReadEvaluatePrint("(let (x 3) (a))"));
-
-
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Lisp;
 using Lisp.Types;
 
-namespace TestLisp;
+namespace LispTest;
 
 [TestClass]
 public sealed class TestBuiltin
@@ -16,7 +16,7 @@ public sealed class TestBuiltin
     [DataRow("(list 1 2 3)", "(1 2 3)")]
     [DataRow("(count (list 1 2 3))", "3")]
     [DataRow("(count (list))", "0")]
-    public void Lists(string input, string expected)
+    public void Lists (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -33,7 +33,7 @@ public sealed class TestBuiltin
     [DataRow("(vec (list))", "[]")]
     [DataRow("(vec []))", "[]")]
     [DataRow("(vec [1 2 3]))", "[1 2 3]")]
-    public void Vectors(string input, string expected)
+    public void Vectors (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -53,7 +53,7 @@ public sealed class TestBuiltin
     [DataRow("(if nil 8 7)", "7")]
     [DataRow("(if true (+ 1 7))", "8")]
     [DataRow("(if [] 7 8)", "7")]
-    public void If(string input, string expected)
+    public void If (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -71,7 +71,7 @@ public sealed class TestBuiltin
     [DataRow("(<= 2 1)", "false")]
     [DataRow("(<= 1 1)", "true")]
     [DataRow("(<= 1 2)", "true")]
-    public void Conditionals(string input, string expected)
+    public void Conditionals (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -149,7 +149,7 @@ public sealed class TestBuiltin
     [DataRow("(= [1 2 (list 3 4 [5 6])] (list 1 2 [3 4 (list 5 6)]))", "true")]
     [DataRow("(= (atom 23) (atom 23))", "false")]
     [DataRow("(= @(atom 23) @(atom 23))", "true")]
-    public void Equality(string input, string expected)
+    public void Equality (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -166,7 +166,7 @@ public sealed class TestBuiltin
     [DataRow("((let [b 0] (lambda [] b)))", "0")]
     [DataRow("((lambda [] 4) )", "4")]
     [DataRow("((lambda [f x] (f x)) (lambda [a] (+ 1 a)) 7)", "8")]
-    public void Lambda(string input, string expected)
+    public void Lambda (string input, string expected)
     {
         var sut = new LispEnvironment();
         var result = string.Empty;
@@ -187,7 +187,7 @@ public sealed class TestBuiltin
     [DataRow("((lambda (a & more) (count more)) 1)", "0")]
     [DataRow("((lambda (a & more) (list? more)) 1)", "true")]
 
-    public void LambdaVariadic(string input, string expected)
+    public void LambdaVariadic (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -198,7 +198,7 @@ public sealed class TestBuiltin
     [DataRow("(do (* 2 3) 7)", "7")]
     [DataRow("(do (define a 6) 7 (+ a 8))", "14")]
     [DataRow("(do (do 1 2))", "2")]
-    public void Do(string input, string expected)
+    public void Do (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -209,7 +209,7 @@ public sealed class TestBuiltin
     [DataRow("(not true)", "false")]
     [DataRow("(not \"a\")", "false")]
     [DataRow("(not 0)", "false")]
-    public void Not(string input, string expected)
+    public void Not (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -244,7 +244,7 @@ public sealed class TestBuiltin
     [DataRow("(strcat (list))", "\"()\"")]
     [DataRow("(strcat [1 2 \"abc\" \"\\\"\"] \"def\")", "\"[1 2 abc \\\"]def\"")]
     [DataRow("(strcat [])", "\"[]\"")]
-    public void Strcat(string input, string expected)
+    public void Strcat (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -266,7 +266,7 @@ public sealed class TestBuiltin
     [DataRow("(type-of (lambda (x) x))", typeof(LispFunction))]
     [DataRow("(type-of +)", typeof(LispPrimitive))]
     [DataRow("(type-of (atom 42))", typeof(LispAtom))]
-    public void TypeOf(string input, Type expected)
+    public void TypeOf (string input, Type expected)
     {
         Assert.AreEqual(LispValue.GetLispType(expected), new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -284,7 +284,7 @@ public sealed class TestBuiltin
     }
 
     [TestMethod]
-    public void Swap()
+    public void Swap ()
     {
         var sut = new LispEnvironment();
         sut.ReadEvaluatePrint("(define inc3 (lambda (a) (+ 3 a)))");
@@ -323,7 +323,7 @@ public sealed class TestBuiltin
     [DataRow("(= () (concat))", "true")]
     [DataRow("(concat [1 2] (list 3 4) (list 5 6))", "(1 2 3 4 5 6)")]
     [DataRow("(concat [1 2])", "(1 2)")]
-    public void Concat(string input, string expected)
+    public void Concat (string input, string expected)
     {
         var sut = new LispEnvironment();
         sut.ReadEvaluatePrint("(define a (list 2 3))");
@@ -339,7 +339,7 @@ public sealed class TestBuiltin
     [DataRow("(first [])", "nil")]
     [DataRow("(first [6])", "6")]
     [DataRow("(first [6 7 8])", "6")]
-    public void First(string input, string expected)
+    public void First (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -352,7 +352,7 @@ public sealed class TestBuiltin
     [DataRow("(rest [])", "()")]
     [DataRow("(rest [6])", "()")]
     [DataRow("(rest [6 7 8])", "(7 8)")]
-    public void Rest(string input, string expected)
+    public void Rest (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -365,7 +365,7 @@ public sealed class TestBuiltin
     [DataRow("(nth [1] 0)", "1")]
     [DataRow("(nth [1 2] 1)", "2")]
     [DataRow("(nth [1 2 nil] 2)", "nil")]
-    public void Nth(string input, string expected)
+    public void Nth (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -453,7 +453,7 @@ public sealed class TestBuiltin
     [TestMethod]
     [DataRow("(symbol \"abc\")", "abc")]
     [DataRow("(keyword \"abc\")", ":abc")]
-    public void Symbol(string input, string expected)
+    public void Symbol (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
