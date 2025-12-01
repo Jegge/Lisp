@@ -8,8 +8,11 @@ public class LispIoPort : LispValue, IDisposable
     private TextReader? _reader;
     private TextWriter? _writer;
 
+    public FileAccess Access { get; }
+
     public LispIoPort (string filepath, FileAccess access)
     {
+        Access = access;
         _filepath = filepath;
         switch (access)
         {

@@ -29,6 +29,24 @@ public sealed class TestFileIO
     }
 
     [TestMethod]
+    public void OpenCheckCloseFile ()
+    {
+        var sut = new LispEnvironment(LispAccess.ReadFiles | LispAccess.WriteFiles);
+
+        sut.ReadEvaluatePrint("(define f (file-open-read \"./Testfiles/test.txt\"))");
+        Assert.AreEqual("true", sut.ReadEvaluatePrint("(input-file? f)"));
+        Assert.AreEqual("false", sut.ReadEvaluatePrint("(output-file? f)"));
+        sut.ReadEvaluatePrint("(file-close f)");
+
+        sut.ReadEvaluatePrint("(define f (file-open-write \"./Testfiles/out.txt\"))");
+        Assert.AreEqual("false", sut.ReadEvaluatePrint("(input-file? f)"));
+        Assert.AreEqual("true", sut.ReadEvaluatePrint("(output-file? f)"));
+        sut.ReadEvaluatePrint("(file-close f)");
+
+        File.Delete("./Testfiles/out.txt");
+    }
+
+    [TestMethod]
     public void FileWriteContent ()
     {
         const string filepath = "./temp.txt";
