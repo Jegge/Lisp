@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36705.20
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLisp", "TestLisp\TestLisp.csproj", "{63E2788D-562A-476B-9B13-9B9EAA7AD116}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LispRepl", "LispRepl\LispRepl.csproj", "{0B1CA61F-A556-41B7-8323-B9F4552EE534}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lisp", "Lisp\Lisp.csproj", "{3FA08FF5-74BE-4264-8B81-0FA791E60F48}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63E2788D-562A-476B-9B13-9B9EAA7AD116}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63E2788D-562A-476B-9B13-9B9EAA7AD116}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63E2788D-562A-476B-9B13-9B9EAA7AD116}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63E2788D-562A-476B-9B13-9B9EAA7AD116}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B1CA61F-A556-41B7-8323-B9F4552EE534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B1CA61F-A556-41B7-8323-B9F4552EE534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B1CA61F-A556-41B7-8323-B9F4552EE534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B1CA61F-A556-41B7-8323-B9F4552EE534}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FA08FF5-74BE-4264-8B81-0FA791E60F48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FA08FF5-74BE-4264-8B81-0FA791E60F48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FA08FF5-74BE-4264-8B81-0FA791E60F48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FA08FF5-74BE-4264-8B81-0FA791E60F48}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C9666F7-83F3-46F6-B2BC-CF0D7115BDFC}
+	EndGlobalSection
+EndGlobal
