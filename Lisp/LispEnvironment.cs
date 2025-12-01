@@ -155,6 +155,10 @@ public sealed class LispEnvironment
 
             // String function
             ["strcat"] = LispPrimitive.DefineVarArg("strcat", (_, seq) => new LispString(string.Join(string.Empty, seq.Values.Select(a => a.Print(false))))),
+            ["string<?"] = LispPrimitive.Define("string<?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) < 0)),
+            ["string>?"] = LispPrimitive.Define("string>?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) > 0)),
+            ["string<=?"] = LispPrimitive.Define("string<=?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) <= 0)),
+            ["string>=?"] = LispPrimitive.Define("string>=?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) >= 0)),
 
             // IO port functions
             ["file-open-read"] = LispPrimitive.Define("file-open-read", (LispEnvironment _, LispString filepath) =>
