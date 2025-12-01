@@ -185,6 +185,8 @@ public sealed class LispEnvironment
                 return new LispNil();
             }),
             ["time-ms"] = LispPrimitive.Define("time-ms", _ => new LispNumber(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())),
+            ["guid"] = LispPrimitive.Define("guid", _ => new LispString(Guid.NewGuid().ToString())),
+            ["random"] = LispPrimitive.Define("random", (LispEnvironment _, LispNumber upperBound) => new LispNumber(Random.Shared.NextInt64((long)upperBound.Value))),
             ["system"] = LispPrimitive.DefineVarArg("system", (LispEnvironment _, LispString filepath, LispSequential arguments) =>
             {
                 if (!access.HasFlag(LispAccess.ExecuteSystem))
