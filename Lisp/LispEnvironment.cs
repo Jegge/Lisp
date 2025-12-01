@@ -10,7 +10,8 @@ public enum LispAccess
     None = 0,
     TerminateProcess = 1,
     ReadFiles = 2,
-    ExecuteSystem = 4,
+    WriteFiles = 4,
+    ExecuteSystem = 8,
     All = int.MaxValue
 }
 
@@ -157,6 +158,21 @@ public sealed class LispEnvironment
             // String function
             ["strcat"] = LispPrimitive.DefineVarArg("strcat", (_, seq) => new LispString(string.Join(string.Empty, seq.Values.Select(a => a.Print(false))))),
 
+            // IO port functions
+            ["file-open-read"] = LispPrimitive.Define("file-open-read", (LispEnvironment _, LispString filepath) =>
+                access.HasFlag(LispAccess.ReadFiles) ? new LispIoPort(filepath.Value, FileAccess.Read)  : throw new AccessDeniedException(LispAccess.ReadFiles)),
+            ["file-open-write"] = LispPrimitive.Define("file-open-write", (LispEnvironment _, LispString filepath) =>
+                access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write)  : throw new AccessDeniedException(LispAccess.WriteFiles)),
+            ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
+            ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
+                access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : new LispNil()) : throw new AccessDeniedException(LispAccess.ReadFiles)),
+            ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) => {
+                if (!access.HasFlag(LispAccess.WriteFiles))
+                    throw new AccessDeniedException(LispAccess.WriteFiles);
+                port.Write(value.Value);
+                return new LispNil();
+            }),
+
             // System functions
             ["prn"] = LispPrimitive.DefineVarArg("prn", (_, seq) =>
             {
@@ -168,11 +184,6 @@ public sealed class LispEnvironment
                 Output?.WriteLine(string.Join(" ", seq.Values.Select(a => a.Print(false))));
                 return new LispNil();
             }),
-            ["slurp"] = LispPrimitive.Define("slurp", (LispEnvironment _, LispString filepath) =>
-                access.HasFlag(LispAccess.ReadFiles)
-                    ? new LispString(File.ReadAllText(filepath.Value))
-                    : throw new AccessDeniedException(LispAccess.ReadFiles)
-            ),
             ["time-ms"] = LispPrimitive.Define("time-ms", _ => new LispNumber(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())),
             ["system"] = LispPrimitive.DefineVarArg("system", (LispEnvironment _, LispString filepath, LispSequential arguments) =>
             {

@@ -1,9 +1,6 @@
 ; inverts boolean logic
 (define not (lambda (x) (if x false true)))
 
-; creates a list from varargs
-;(define (list . objs) objs)
-
 ; identity returns self
 (define-macro identity (lambda (x) x))
 
@@ -56,9 +53,6 @@
 (define all (lambda (sequence) (fold and true sequence)))
 (define any (lambda (sequence) (fold or false sequence)))
 
-;(define (max first . rest) (fold (lambda (old new) (if (> old new) old new)) first rest))
-;(define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
-
 (define map (lambda (func sequence) (foldr (lambda (x y) (cons (func x) y)) '() sequence)))
 (define filter (lambda (pred sequence) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() sequence)))
 
@@ -83,7 +77,8 @@
 (define false? (curry = false))
 (define true? (curry = true))
 
-(define load-file (lambda (f) (eval (read (strcat "(do " (slurp f) "\nnil)")))))
+(define file-content (lambda (f) (file-read (file-open-read f))))
+(define load-file (lambda (f) (eval (read (strcat "(do " (file-read (file-open-read f)) "\nnil)")))))
 
 ; creates a list from start (inclusive) to stop (not inclusive)
 (define range (lambda (start stop step)
