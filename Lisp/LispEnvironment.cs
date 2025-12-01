@@ -92,8 +92,8 @@ public sealed class LispEnvironment
             ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? new LispNil()),
             ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => new LispList(seq.Values.Skip(1))),
             ["nth"] = LispPrimitive.Define("nth", (LispEnvironment _, LispSequential seq, LispNumber index) => seq.Values[(int)index.Value]),
-            ["null?"] = LispPrimitive.Define("null", (LispEnvironment _, LispSequential seq) => new LispBool(seq.Count == 0)),
-            ["count"] = LispPrimitive.Define("count", (LispEnvironment _, LispSequential seq) => new LispNumber(seq.Count)),
+            ["null?"] = LispPrimitive.Define("null?", (LispEnvironment _, LispSequential seq) => new LispBool(seq.Count == 0)),
+            ["length"] = LispPrimitive.Define("length", (LispEnvironment _, LispSequential seq) => new LispNumber(seq.Count)),
             ["list"] = LispPrimitive.DefineVarArg("list", (_, seq) => new LispList(seq.Values)),
             ["vector"] = LispPrimitive.DefineVarArg("vector", (_, seq) => new LispVector(seq.Values)),
 

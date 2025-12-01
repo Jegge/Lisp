@@ -14,8 +14,8 @@ public sealed class TestBuiltin
     [DataRow("(null? (list))", "true")]
     [DataRow("(null? (list 1))", "false")]
     [DataRow("(list 1 2 3)", "(1 2 3)")]
-    [DataRow("(count (list 1 2 3))", "3")]
-    [DataRow("(count (list))", "0")]
+    [DataRow("(length (list 1 2 3))", "3")]
+    [DataRow("(length (list))", "0")]
     public void Lists (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
@@ -25,8 +25,8 @@ public sealed class TestBuiltin
     [DataRow("[]", "[]")]
     [DataRow("(null? [])", "true")]
     [DataRow("(null? [1])", "false")]
-    [DataRow("(count [1 2 3])", "3")]
-    [DataRow("(count [])", "0")]
+    [DataRow("(length [1 2 3])", "3")]
+    [DataRow("(length [])", "0")]
     [DataRow("(list? [1 2 3])", "false")]
     [DataRow("(vec '(1 2 3))", "[1 2 3]")]
     [DataRow("(vector? [1 2 3])", "true")]
@@ -178,13 +178,13 @@ public sealed class TestBuiltin
     }
 
     [TestMethod]
-    [DataRow("((lambda (& more) (count more)) 1 2 3)", "3")]
+    [DataRow("((lambda (& more) (length more)) 1 2 3)", "3")]
     [DataRow("((lambda (& more) (list? more)) 1 2 3)", "true")]
-    [DataRow("((lambda (& more) (count more)) 1)", "1")]
-    [DataRow("((lambda (& more) (count more)) )", "0")]
+    [DataRow("((lambda (& more) (length more)) 1)", "1")]
+    [DataRow("((lambda (& more) (length more)) )", "0")]
     [DataRow("((lambda (& more) (list? more)) )", "true")]
-    [DataRow("((lambda (a & more) (count more)) 1 2 3)", "2")]
-    [DataRow("((lambda (a & more) (count more)) 1)", "0")]
+    [DataRow("((lambda (a & more) (length more)) 1 2 3)", "2")]
+    [DataRow("((lambda (a & more) (length more)) 1)", "0")]
     [DataRow("((lambda (a & more) (list? more)) 1)", "true")]
 
     public void LambdaVariadic (string input, string expected)

@@ -59,9 +59,9 @@
 (define filter (lambda (pred sequence) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() sequence)))
 
 (define-macro cond (lambda (& xs)
-    (if (> (count xs) 0) 
+    (if (> (length xs) 0) 
         (list 'if (first xs)
-        (if (> (count xs) 1) 
+        (if (> (length xs) 1) 
             (nth xs 1) (throw "Expected even number of arguments"))
             (cons 'cond (rest (rest xs)))))))
 
