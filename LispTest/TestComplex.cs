@@ -53,4 +53,11 @@ public sealed class TestComplex
         sut.ReadEvaluatePrint("(define bar (lambda (n) (if (= n 0) 0 (foo (- n 1)))))");
         Assert.AreEqual("0", sut.ReadEvaluatePrint("(foo 10000)"));
     }
+
+    [TestMethod]
+    public void Quine ()
+    {
+        const string quine = "((lambda (q) (quasiquote ((unquote q) (quote (unquote q))))) (quote (lambda (q) (quasiquote ((unquote q) (quote (unquote q)))))))";
+        Assert.AreEqual(quine, new LispEnvironment().ReadEvaluatePrint(quine));
+    }
 }

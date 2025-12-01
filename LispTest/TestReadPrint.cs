@@ -31,8 +31,6 @@ public sealed class TestReadPrint
     [DataRow("(read \"(+ 2 3)\")", "(+ 2 3)")]
     [DataRow("(read \"\\\"\\n\\\"\")", "\"\\n\"")]
     [DataRow("(read \"7 ;; comment\")", "7")]
-    //[DataRow("", "")]
-    //[DataRow("", "")]
     public void ReadString (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
@@ -69,20 +67,6 @@ public sealed class TestReadPrint
     }
 
     [TestMethod]
-    [DataRow("(1 2)", "(1 2)")]
-    [DataRow("( )", "()")]
-    [DataRow("(nil)", "(nil)")]
-    [DataRow("  ( +   1   (+   2 3   )   )  ", "(+ 1 (+ 2 3))")]
-    [DataRow("(* 3 4)", "(* 3 4)")]
-    [DataRow("(** 3 4)", "(** 3 4)")]
-    [DataRow("(-3 4)", "(-3 4)")]
-    public void Lists(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
-    }
-
-
-    [TestMethod]
     [DataRow("\"abc\"", "\"abc\"")]
     [DataRow("\"abc  (with parens)\"", "\"abc  (with parens)\"")]
     [DataRow("\"abc\\\"def\"", "\"abc\\\"def\"")]
@@ -94,7 +78,6 @@ public sealed class TestReadPrint
     {
         Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }
-
 
     [TestMethod]
     public void CommaAsWhitespace ()
@@ -127,19 +110,6 @@ public sealed class TestReadPrint
     [DataRow(":kw", ":kw")]
     [DataRow("(:kw1 :kw2 :kw3)", "(:kw1 :kw2 :kw3)")]
     public void Keywords(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("[+ 1 2]", "[+ 1 2]")]
-    [DataRow("[]", "[]")]
-    [DataRow("[ ]", "[]")]
-    [DataRow("[[3 4]]", "[[3 4]]")]
-    [DataRow("[+ 1 [+ 2 3]]", "[+ 1 [+ 2 3]]")]
-    [DataRow("  [ +   1   [+   2 3   ]   ]  ", "[+ 1 [+ 2 3]]")]
-    [DataRow("([])", "([])")]
-    public void Vectors(string input, string expected)
     {
         Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }

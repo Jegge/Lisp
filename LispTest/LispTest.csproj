@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Testfiles\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Testfiles\test.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

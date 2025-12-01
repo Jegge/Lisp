@@ -93,5 +93,4 @@ public sealed class TestQuote
         sut.ReadEvaluatePrint("(define c (quote (1 \"b\" \"d\")))");
         Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
     }
-
 }

@@ -34,4 +34,20 @@ public sealed class TestMacro
         Assert.AreEqual("2", sut.ReadEvaluatePrint("(a)"));
         Assert.AreEqual("2", sut.ReadEvaluatePrint("(let (x 3) (a))"));
     }
+
+    [TestMethod]
+    [DataRow("(cond)", "nil")]
+    [DataRow("(cond true 7)", "7")]
+    [DataRow("(cond false 7)", "nil")]
+    [DataRow("(cond true 7 true 8)", "7")]
+    [DataRow("(cond false 7 true 8)", "8")]
+    [DataRow("(cond false 7 false 8 \"else\" 9)", "9")]
+    [DataRow("(cond false 7 (= 2 2) 8 \"else\" 9)", "8")]
+    [DataRow("(cond false 7 false 8 false 9)", "nil")]
+    [DataRow("(let (x (cond false \"no\" true \"yes\")) x)", "\"yes\"")]
+    [DataRow("(let [x (cond false \"no\" true \"yes\")] x)", "\"yes\"")]
+    public void Cond (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
 }
