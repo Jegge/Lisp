@@ -49,15 +49,17 @@
         (cons init '())
         (cons init (unfold func (func init) pred))))
 
-(define (sum . lst)         (fold + 0 lst))
-(define (product . lst)     (fold * 1 lst))
-(define (and . lst)         (fold && true lst))
-(define (or . lst)          (fold || false lst))
+(define (sum . lst) (fold + 0 lst))
+(define (product . lst) (fold * 1 lst))
+(define (and . lst) (fold && true lst))
+(define (or . lst) (fold || false lst))
 
 (define (any? pred sequence) (or (map pred sequence)))
 (define (every? pred sequence) (and (map pred sequence)))
 (define (map func sequence) (foldr (lambda (x y) (cons (func x) y)) '() sequence))
 (define (filter pred sequence) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() sequence))
+(define (max first . rest) (fold (lambda (old new) (if (> old new) old new)) first rest))
+(define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
 
 (define-macro cond (lambda xs
     (if (> (length xs) 0) 

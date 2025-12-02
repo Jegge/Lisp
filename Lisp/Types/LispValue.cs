@@ -46,7 +46,7 @@ public abstract class LispValue
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.If } ]}:
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Define } ]}:
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.DefineMacro } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispFunction.Token } ]}:
+                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispLambda.Token } ]}:
                     return new LispBool(true);
 
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol symbol ]}:
@@ -128,13 +128,13 @@ public abstract class LispValue
                 }
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.Define }, LispList { Values: [LispSymbol binding, ..] signature }, { } body ] }:
                 {
-                    var result = new LispFunction(signature[1..].Cast<LispSymbol>(), null, body, environment);
+                    var result = new LispLambda(signature[1..].Cast<LispSymbol>(), null, body, environment);
                     environment[binding] = result;
                     return result;
                 }
                 case LispList { Values: [LispSymbol { Value: LispSymbol.Token.Define }, LispDotList { Head: [LispSymbol binding, ..] signature, Tail: LispSymbol varArg }, { } body ] }:
                 {
-                    var result = new LispFunction(signature[1..].Cast<LispSymbol>(), varArg, body, environment);
+                    var result = new LispLambda(signature[1..].Cast<LispSymbol>(), varArg, body, environment);
                     environment[binding] = result;
                     return result;
                 }
@@ -145,7 +145,7 @@ public abstract class LispValue
                 // Special form: define-macro
                 case LispList { Values: [LispSymbol { Value: LispSymbol.Token.DefineMacro }, LispSymbol binding, { } body] } list:
                 {
-                    if (body.Eval(environment) is not LispFunction macro)
+                    if (body.Eval(environment) is not LispLambda macro)
                         throw new BadFormException(list);
                     macro.IsMacro = true;
                     environment[binding] = macro;
@@ -156,16 +156,16 @@ public abstract class LispValue
                     throw new BadFormException(list);
 
                 // Special form lambda
-                case LispList { Values: [LispSymbol { Value: LispFunction.Token }, LispSymbol varArg, { } body] }:
-                    return new LispFunction([], varArg, body, environment);
+                case LispList { Values: [LispSymbol { Value: LispLambda.Token }, LispSymbol varArg, { } body] }:
+                    return new LispLambda([], varArg, body, environment);
 
-                case LispList { Values: [LispSymbol { Value: LispFunction.Token }, LispDotList { Head: var bindings, Tail: LispSymbol varArg }, { } body] }:
-                    return new LispFunction(bindings.Cast<LispSymbol>(), varArg, body, environment);
+                case LispList { Values: [LispSymbol { Value: LispLambda.Token }, LispDotList { Head: var bindings, Tail: LispSymbol varArg }, { } body] }:
+                    return new LispLambda(bindings.Cast<LispSymbol>(), varArg, body, environment);
 
-                case LispList { Values: [LispSymbol { Value: LispFunction.Token }, LispSequential bindings, { } body] }:
-                    return new LispFunction(bindings.Values.Cast<LispSymbol>(), null, body, environment);
+                case LispList { Values: [LispSymbol { Value: LispLambda.Token }, LispSequential bindings, { } body] }:
+                    return new LispLambda(bindings.Values.Cast<LispSymbol>(), null, body, environment);
 
-                case LispList { Values: [LispSymbol { Value: LispFunction.Token }, ..] } list:
+                case LispList { Values: [LispSymbol { Value: LispLambda.Token }, ..] } list:
                     throw new BadFormException(list);
 
                 // Application
@@ -179,12 +179,12 @@ public abstract class LispValue
                         case LispPrimitive primitive:
                             return primitive.Body(environment, new LispList(list.Values[1..].Select(v => v.Eval(environment))));
 
-                        case LispFunction { IsMacro: false } function:
+                        case LispLambda { IsMacro: false } function:
                             environment = new LispEnvironment(function, list.Values.Skip(1).Select(v => v.Eval(environment)).ToList());
                             value = function.Body;
                             continue;
 
-                        case LispFunction { IsMacro: true } macro:
+                        case LispLambda { IsMacro: true } macro:
                             value = macro.Body.Eval(new LispEnvironment(macro, list.Values.Skip(1).ToList()));
                             continue;
                     }

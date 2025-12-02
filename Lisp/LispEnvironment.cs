@@ -55,7 +55,7 @@ public sealed class LispEnvironment
             ["type-of"] = LispPrimitive.Define("type-of", (LispEnvironment _, LispValue value) => new LispSymbol(value.GetLispType())),
             ["nil?"] = LispPrimitive.Define("nil?", (LispEnvironment _, LispValue value) => new LispBool(value is LispNil)),
             ["lambda?"] = LispPrimitive.Define("lambda?", (LispEnvironment _, LispValue value) => new LispBool(value is LispApplicable)),
-            ["macro?"] = LispPrimitive.Define("macro?", (LispEnvironment _, LispValue value) => new LispBool(value is LispFunction { IsMacro: true })),
+            ["macro?"] = LispPrimitive.Define("macro?", (LispEnvironment _, LispValue value) => new LispBool(value is LispLambda { IsMacro: true })),
             ["throw"] = LispPrimitive.Define("throw", LispValue (LispEnvironment _, LispString message) => throw new RuntimeException(message.Value)),
 
             // Arithmetic operators
@@ -147,8 +147,8 @@ public sealed class LispEnvironment
                 return seq.GetAt<LispValue>(0).Eval(environment) switch
                 {
                     LispPrimitive primitive => primitive.Body(environment, new LispList(args)),
-                    LispFunction { IsMacro: true } macro => macro.Body.Eval(new LispEnvironment(macro, args)),
-                    LispFunction function => function.Body.Eval(new LispEnvironment(function, args)),
+                    LispLambda { IsMacro: true } macro => macro.Body.Eval(new LispEnvironment(macro, args)),
+                    LispLambda function => function.Body.Eval(new LispEnvironment(function, args)),
                     _ => throw new BadFormException(new LispList(seq))
                 };
             }),
@@ -220,21 +220,21 @@ public sealed class LispEnvironment
         ReadEvaluatePrint($"(do {reader.ReadToEnd()}\nnil)\n");
     }
 
-    internal LispEnvironment (LispFunction function, IList<LispValue> arguments)
+    internal LispEnvironment (LispLambda lambda, IList<LispValue> arguments)
     {
-        _parent = function.Environment;
+        _parent = lambda.Environment;
         _values = [];
 
-        Output = function.Environment.Output;
+        Output = lambda.Environment.Output;
 
-        if (function.Arguments.Length != arguments.Count && function.VarArg is null)
-            throw new ArgumentCountException(function.Arguments.Length, arguments.Count);
+        if (lambda.Arguments.Length != arguments.Count && lambda.VarArg is null)
+            throw new ArgumentCountException(lambda.Arguments.Length, arguments.Count);
 
-        foreach (var (name, value) in function.Arguments.Zip(arguments))
+        foreach (var (name, value) in lambda.Arguments.Zip(arguments))
             _values[name.Value] = value;
 
-        if (function.VarArg is not null)
-            _values[function.VarArg.Value] = new LispList(arguments.Skip(function.Arguments.Length));
+        if (lambda.VarArg is not null)
+            _values[lambda.VarArg.Value] = new LispList(arguments.Skip(lambda.Arguments.Length));
     }
     internal LispEnvironment (LispEnvironment parent, IEnumerable<(LispSymbol Symbol, LispValue Value)> bindings)
     {

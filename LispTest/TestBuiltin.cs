@@ -136,7 +136,7 @@ public sealed class TestBuiltin
     [DataRow("(type-of \"abc\")", typeof(LispString))]
     [DataRow("(type-of 'abc)", typeof(LispSymbol))]
     [DataRow("(type-of :abc)", typeof(LispKeyword))]
-    [DataRow("(type-of (lambda (x) x))", typeof(LispFunction))]
+    [DataRow("(type-of (lambda (x) x))", typeof(LispLambda))]
     [DataRow("(type-of +)", typeof(LispPrimitive))]
     [DataRow("(type-of (atom 42))", typeof(LispAtom))]
     public void TypeOf (string input, Type expected)
