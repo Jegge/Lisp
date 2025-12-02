@@ -161,7 +161,11 @@ internal static class LispParser
             case LispList.Token.End or LispVector.Token.End or LispHashMap.Token.End:
                 throw new UnbalancedParenthesisException(token.Value, token.Line, token.Column);
             case LispList.Token.Begin:
-                return new LispList(tokens.ParseUntil(LispList.Token.End, token.Line, token.Column));
+                return tokens.ParseUntil(LispList.Token.End, token.Line, token.Column).ToArray() switch
+                {
+                    [.., LispSymbol { Value: LispDotList.Token.Dot }, { } tail] list => new LispDotList(list.SkipLast(2), tail),
+                    var list => list.Contains(new LispSymbol(".")) ? throw new UnbalancedParenthesisException(token.Value, token.Line, token.Column) : new LispList(list)
+                };
             case LispVector.Token.Begin:
                 return new LispVector(tokens.ParseUntil(LispVector.Token.End, token.Line, token.Column));
             case LispHashMap.Token.Begin:
