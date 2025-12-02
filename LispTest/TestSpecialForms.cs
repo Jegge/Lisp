@@ -50,14 +50,15 @@ public sealed class TestSpecialForms
     }
 
     [TestMethod]
-    [DataRow("((lambda (& more) (length more)) 1 2 3)", "3")]
-    [DataRow("((lambda (& more) (list? more)) 1 2 3)", "true")]
-    [DataRow("((lambda (& more) (length more)) 1)", "1")]
-    [DataRow("((lambda (& more) (length more)) )", "0")]
-    [DataRow("((lambda (& more) (list? more)) )", "true")]
-    [DataRow("((lambda (a & more) (length more)) 1 2 3)", "2")]
-    [DataRow("((lambda (a & more) (length more)) 1)", "0")]
-    [DataRow("((lambda (a & more) (list? more)) 1)", "true")]
+    //[DataRow("((lambda (& more) (length more)) 1 2 3)", "3")]
+    [DataRow("((lambda more (length more)) 1 2 3)", "3")]
+    [DataRow("((lambda more (list? more)) 1 2 3)", "true")]
+    [DataRow("((lambda more (length more)) 1)", "1")]
+    [DataRow("((lambda more (length more)) )", "0")]
+    [DataRow("((lambda more (list? more)) )", "true")]
+    [DataRow("((lambda (a . more) (length more)) 1 2 3)", "2")]
+    [DataRow("((lambda (a . more) (length more)) 1)", "0")]
+    [DataRow("((lambda (a . more) (list? more)) 1)", "true")]
     public void LambdaVariadic (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);

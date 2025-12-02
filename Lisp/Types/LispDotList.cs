@@ -11,6 +11,10 @@ public sealed class LispDotList (IEnumerable<LispValue> head, LispValue tail) : 
         public const string Dot = ".";
         public const string End = ")";
     }
+
+    public LispValue[] Head => Values[..^1];
+    public LispValue Tail => Values.Last();
+
     public override string Print (bool readable) =>
         $"{Token.Begin}{string.Join(' ', Values.SkipLast(1).Select(v => v.Print(readable)))} {Token.Dot} {Values.Last().Print(readable)}{Token.End}";
 }

@@ -141,7 +141,7 @@ public sealed class TestVector
 
     [TestMethod]
     [DataRow("(map (lambda (a) (* 2 a)) [1 2 3])", "(2 4 6)")]
-    [DataRow("(map (lambda [& args] (list? args)) [1 2])", "(true true)")]
+    [DataRow("(map (lambda args (list? args)) [1 2])", "(true true)")]
     public void Map (string input, string expected)
     {
         var sut = new LispEnvironment();

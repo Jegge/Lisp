@@ -147,8 +147,8 @@ public sealed class LispEnvironment
                 return seq.GetAt<LispValue>(0).Eval(environment) switch
                 {
                     LispPrimitive primitive => primitive.Body(environment, new LispList(args)),
-                    LispFunction { IsMacro: true } macro => macro.Body.Eval(new LispEnvironment(macro.Environment, macro.Bindings, args)),
-                    LispFunction function => function.Body.Eval(new LispEnvironment(function.Environment, function.Bindings, args)),
+                    LispFunction { IsMacro: true } macro => macro.Body.Eval(new LispEnvironment(macro, args)),
+                    LispFunction function => function.Body.Eval(new LispEnvironment(function, args)),
                     _ => throw new BadFormException(new LispList(seq))
                 };
             }),
@@ -220,27 +220,21 @@ public sealed class LispEnvironment
         ReadEvaluatePrint($"(do {reader.ReadToEnd()}\nnil)\n");
     }
 
-    internal LispEnvironment (LispEnvironment parent, IList<LispSymbol> bindings, IList<LispValue> arguments)
+    internal LispEnvironment (LispFunction function, IList<LispValue> arguments)
     {
-        _parent = parent;
+        _parent = function.Environment;
         _values = [];
 
-        Output = parent.Output;
+        Output = function.Environment.Output;
 
-        for (var i = 0; i < bindings.Count; i++)
-            if (bindings[i] is { Value: LispFunction.Token.Variadic })
-            {
-                var binding = i < bindings.Count - 1
-                    ? bindings[i + 1]
-                    : throw new ArgumentCountException(bindings.Count + 1, bindings.Count);
+        if (function.Arguments.Length != arguments.Count && function.VarArg is null)
+            throw new ArgumentCountException(function.Arguments.Length, arguments.Count);
 
-                _values[binding.Value] = new LispList(arguments.Skip(i));
-                break;
-            }
-            else if (i < arguments.Count)
-                _values[bindings[i].Value] = arguments[i];
-            else
-                _values[bindings[i].Value] = new LispNil();
+        foreach (var (name, value) in function.Arguments.Zip(arguments))
+            _values[name.Value] = value;
+
+        if (function.VarArg is not null)
+            _values[function.VarArg.Value] = new LispList(arguments.Skip(function.Arguments.Length));
     }
     internal LispEnvironment (LispEnvironment parent, IEnumerable<(LispSymbol Symbol, LispValue Value)> bindings)
     {
@@ -260,6 +254,9 @@ public sealed class LispEnvironment
             : _parent?[symbol] ??  throw new SymbolNotFoundException(symbol);
         set => _values[symbol.Value] = value;
     }
+
+    internal bool ContainsSymbol (LispSymbol symbol) =>
+        _values.ContainsKey(symbol.Value) || (_parent?.ContainsSymbol(symbol) ?? false);
 
     /// <summary>
     /// Read the content of the current environment

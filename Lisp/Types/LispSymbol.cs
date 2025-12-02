@@ -16,8 +16,10 @@ public sealed class LispSymbol (string value) : LispValue
         internal const string Do = "do";
         internal const string Let = "let";
         internal const string Define = "define";
+        internal const string DefineMacro = "define-macro";
         internal const string Try = "try";
         internal const string Catch = "catch";
+        internal const string BoundP = "bound?";
     }
 
     public string Value { get; } = value;
