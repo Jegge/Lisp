@@ -1,5 +1,4 @@
 using Lisp;
-using Lisp.Types;
 
 namespace LispTest;
 

@@ -1,5 +1,5 @@
 ﻿using Lisp;
-using Lisp.Types;
+using Lisp.Parser;
 
 namespace LispTest;
 
@@ -19,7 +19,7 @@ public sealed class TestQuote
     [DataRow("~@(1 2 3)", "(splice-unquote (1 2 3))")]
     public void ReadAndWrite (string input, string expected)
     {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+        Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
     }
 
     [TestMethod]

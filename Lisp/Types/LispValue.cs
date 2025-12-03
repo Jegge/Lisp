@@ -11,7 +11,6 @@ public abstract class LispValue
     internal string GetLispType () => GetLispType(GetType());
     internal static string GetLispType<T> () where T : LispValue => GetLispType(typeof(T));
 
-    public static LispValue Read (string input) => new Queue<LispToken>(input.Tokenize()).Parse();
     // This method is not OO, to enable tail recursion
     public LispValue Eval (LispEnvironment environment)
     {

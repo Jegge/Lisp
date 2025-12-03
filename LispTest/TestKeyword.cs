@@ -1,4 +1,5 @@
 using Lisp;
+using Lisp.Parser;
 using Lisp.Types;
 
 namespace LispTest;
@@ -11,7 +12,7 @@ public sealed class TestKeyword
     [DataRow("(:kw1 :kw2 :kw3)", "(:kw1 :kw2 :kw3)")]
     public void ReadAndPrint (string input, string expected)
     {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+        Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
     }
 
     [TestMethod]

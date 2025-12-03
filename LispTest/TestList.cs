@@ -1,4 +1,5 @@
 using Lisp;
+using Lisp.Parser;
 using Lisp.Types;
 
 namespace LispTest;
@@ -16,7 +17,7 @@ public sealed class TestList
     [DataRow("(-3 4)", "(-3 4)")]
     public void ReadAndPrint (string input, string expected)
     {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+        Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
     }
 
     [TestMethod]
@@ -25,7 +26,7 @@ public sealed class TestList
     [DataRow(") (+ 1 2)")]
     public void UnbalancedParenthesisException(string input)
     {
-        Assert.ThrowsException<UnbalancedParenthesisException>(() => LispValue.Read(input).Print(true));
+        Assert.ThrowsException<UnbalancedParenthesisException>(() => LispReader.Read(input).Print(true));
     }
 
     [TestMethod]

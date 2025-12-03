@@ -1,30 +1,11 @@
 ﻿using Lisp;
 using Lisp.Parser;
-using Lisp.Types;
 
 namespace LispTest;
 
 [TestClass]
 public sealed class TestReadPrint
 {
-    [TestMethod]
-    public void Tokenize()
-    {
-        const string input = "abc 123.45\t\t(ab) \"test welt\" \ntrue   false nil ((blubb)) '(1 2)\n \"hallo \\\"welt\\\"!\" :keyword";
-        var output = new[]
-        {
-            "abc", "123.45", "(", "ab", ")", "\"test welt\"",
-            "true", "false", "nil", "(", "(", "blubb", ")", ")", "'", "(", "1", "2", ")",
-            "\"hallo \"welt\"!\"", ":keyword"
-        };
-        var tokens = input.Tokenize().ToArray();
-
-        Assert.AreEqual(output.Length, tokens.Length);
-
-        foreach (var (expected, token) in output.Zip(tokens))
-            Assert.AreEqual(expected, token.Value);
-    }
-
     [TestMethod]
     [DataRow("(read \"(1 2 (3 4) nil)\")", "(1 2 (3 4) nil)")]
     [DataRow("(= nil (read \"nil\"))", "true")]
@@ -43,7 +24,7 @@ public sealed class TestReadPrint
     [DataRow("-123", "-123")]
     public void Numbers(string input, string expected)
     {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+        Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
     }
 
 
@@ -57,13 +38,13 @@ public sealed class TestReadPrint
     [DataRow("\"abc\\ndef\"", "\"abc\\ndef\"")]
     public void Strings (string input, string expected)
     {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+        Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
     }
 
     [TestMethod]
     public void CommaAsWhitespace ()
     {
-        Assert.AreEqual("(1 2 3)", LispValue.Read("(1 2, 3, ,,,,),,").Print(true));
+        Assert.AreEqual("(1 2 3)", LispReader.Read("(1 2, 3, ,,,,),,").Print(true));
     }
 
     [TestMethod]
@@ -75,6 +56,6 @@ public sealed class TestReadPrint
 
     public void UnterminatedStringException(string input)
     {
-        Assert.ThrowsException<UnterminatedStringException>(() => LispValue.Read(input).Print(true));
+        Assert.ThrowsException<UnterminatedStringException>(() => LispReader.Read(input).Print(true));
     }
 }

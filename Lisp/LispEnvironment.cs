@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Lisp.Parser;
 using Lisp.Types;
 
 namespace Lisp;
@@ -125,7 +126,7 @@ public sealed class LispEnvironment
             ["keyword"] = LispPrimitive.Define("keyword", (LispEnvironment _, LispString name) => new LispKeyword(name.Value)),
 
             // Core read / eval / print / apply functions
-            ["read"] = LispPrimitive.Define("read", (LispEnvironment _, LispString content) => LispValue.Read(content.Value)),
+            ["read"] = LispPrimitive.Define("read", (LispEnvironment _, LispString content) => LispReader.Read(content.Value)),
             ["eval"] = LispPrimitive.Define("eval", (LispEnvironment _, LispValue value) => value.Eval(this)), // always evaluate in the root environment
             ["print"] = LispPrimitive.DefineVarArg("print", (_, seq) => new LispString(string.Join(' ', seq.Values.Select(a => a.Print(true))))),
             ["apply"] = LispPrimitive.DefineVarArg("apply", (environment, seq) =>
@@ -159,7 +160,7 @@ public sealed class LispEnvironment
                 access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write) : throw new AccessDeniedException(LispAccess.WriteFiles)),
             ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
             ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
-                access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : LispValue.Nil) : throw new AccessDeniedException(LispAccess.ReadFiles)),
+                access.HasFlag(LispAccess.ReadFiles) ? port.Read() is { } s ? new LispString(s) : LispValue.Nil : throw new AccessDeniedException(LispAccess.ReadFiles)),
             ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) =>
                 !access.HasFlag(LispAccess.WriteFiles) ? throw new AccessDeniedException(LispAccess.WriteFiles) : new LispBool(port.Write(value.Value))),
             ["input-file?"] = LispPrimitive.Define("input-file?", (LispEnvironment _, LispValue value) => new LispBool(value is LispIoPort { Access: FileAccess.Read })),
@@ -450,5 +451,5 @@ public sealed class LispEnvironment
     /// <param name="input">The string to be executed.</param>
     /// <exception cref="LispException"/>
     /// <returns>The evaluation result.</returns>
-    public string ReadEvaluatePrint(string input) => LispValue.Read(input).Eval(this).Print(true);
+    public string ReadEvaluatePrint(string input) => LispReader.Read(input).Eval(this).Print(true);
 }

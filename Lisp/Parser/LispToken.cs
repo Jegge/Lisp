@@ -2,7 +2,7 @@
 
 namespace Lisp.Parser;
 
-[DebuggerDisplay("({Line}, {Column}) {Value}")]
+[DebuggerDisplay("({Line}, {Column}) '{Value}'")]
 internal readonly struct LispToken (int line, int column, string value)
 {
     public int Line { get; } = line;

@@ -9,7 +9,7 @@ public sealed class TestFileIO
     [TestMethod]
     public void UnexpectedEndOfFileException ()
     {
-        Assert.ThrowsException<UnexpectedEndOfFileException>(() => new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint("(read \";; comment\")"));
+        Assert.ThrowsException<UnexpectedEndOfInputException>(() => new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint("(read \";; comment\")"));
     }
 
     [TestMethod]
@@ -49,7 +49,7 @@ public sealed class TestFileIO
     [TestMethod]
     public void FileWriteContent ()
     {
-        const string filepath = "./temp.txt";
+        var filepath = Path.GetTempFileName();
         const string data = "Das ist ein Test!\n";
         Assert.AreEqual("true", new LispEnvironment(LispAccess.WriteFiles).ReadEvaluatePrint($"(file-write-content \"{LispString.Escape(filepath)}\" \"{LispString.Escape(data)}\")"), "input:<{0}>", filepath);
         Assert.AreEqual("\"Das ist ein Test!\\n\"", new LispEnvironment(LispAccess.ReadFiles).ReadEvaluatePrint($"(file-read-content \"{LispString.Escape(filepath)}\")"), "input:<{0}>", filepath);

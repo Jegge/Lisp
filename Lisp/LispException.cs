@@ -4,8 +4,8 @@ namespace Lisp;
 
 internal class LispException (string message) : Exception (message);
 
-internal class UnterminatedStringException () : LispException ("Found unterminated string.");
-internal class UnexpectedEndOfFileException () : LispException ("Unexpected end of file.");
+internal class UnterminatedStringException (int line, int column) : LispException ($"Found unterminated string at ({line}, {column}).");
+internal class UnexpectedEndOfInputException () : LispException ("Unexpected end of file.");
 internal class UnbalancedParenthesisException (string parenthesis, int line, int column) : LispException ($"Unbalanced parenthesis '{parenthesis}' at ({line}, {column}).");
 
 internal class BadFormException (LispList list) : LispException ($"Bad form: {list.Print(false)}.");

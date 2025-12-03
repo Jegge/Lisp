@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Lisp.Parser;
 using Lisp.Types;
 
 Console.InputEncoding = Encoding.UTF8;
@@ -48,7 +49,7 @@ environment.Register("read-json", (LispEnvironment env, LispString content) =>
             JsonValueKind.Array => new LispVector(element.EnumerateArray().Select(ToLispValue)),
             JsonValueKind.String => (element.GetString() ?? string.Empty) switch
             {
-                ['\'', '(', .., ')'] s => LispValue.Read(s).Eval(env),
+                ['\'', '(', .., ')'] s => LispReader.Read(s).Eval(env),
                 var s => new LispString(s)
             },
             JsonValueKind.Number => new LispNumber(element.GetDecimal()),

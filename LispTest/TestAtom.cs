@@ -1,4 +1,5 @@
 using Lisp;
+using Lisp.Parser;
 using Lisp.Types;
 
 namespace LispTest;
@@ -9,7 +10,7 @@ public sealed class TestAtom
     [TestMethod]
     public void ReadDeref()
     {
-        Assert.AreEqual("(deref a)", LispValue.Read("@a").Print(true));
+        Assert.AreEqual("(deref a)", LispReader.Read("@a").Print(true));
     }
 
     [TestMethod]
