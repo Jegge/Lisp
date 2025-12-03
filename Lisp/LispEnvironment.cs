@@ -92,10 +92,12 @@ public sealed class LispEnvironment
             ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? new LispNil()),
             ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => new LispList(seq.Values.Skip(1))),
             ["nth"] = LispPrimitive.Define("nth", (LispEnvironment _, LispSequential seq, LispNumber index) => seq.Values[(int)index.Value]),
-            ["null?"] = LispPrimitive.Define("null?", (LispEnvironment _, LispSequential seq) => new LispBool(seq.Count == 0)),
-            ["length"] = LispPrimitive.Define("length", (LispEnvironment _, LispSequential seq) => new LispNumber(seq.Count)),
             ["list"] = LispPrimitive.DefineVarArg("list", (_, seq) => new LispList(seq.Values)),
             ["vector"] = LispPrimitive.DefineVarArg("vector", (_, seq) => new LispVector(seq.Values)),
+
+            // Container (aka List, Vector, Hashmap) functions
+            ["null?"] = LispPrimitive.Define("null?", (LispEnvironment _, LispContainer container) => new LispBool(container.Count == 0)),
+            ["length"] = LispPrimitive.Define("length", (LispEnvironment _, LispContainer container) => new LispNumber(container.Count)),
 
             // Atom functions
             ["atom"] = LispPrimitive.Define("atom", (LispEnvironment _, LispValue value) => new LispAtom(value)),
@@ -110,25 +112,10 @@ public sealed class LispEnvironment
             }),
 
             // Hashmap functions
-            ["hashmap"] = LispPrimitive.DefineVarArg("hashmap", (_, values) =>
-                values.Count % 2 == 0
-                    ? new LispHashMap(values.TuplesOf<LispValue, LispValue>().ToDictionary())
-                    : throw new RuntimeException("Expected even number of arguments")),
+            ["hashmap"] = LispPrimitive.DefineVarArg("hashmap", (_, values) => new LispHashMap(values.TuplesOf<LispValue, LispValue>().ToDictionary())),
             ["contains?"] = LispPrimitive.Define("contains?", (LispEnvironment _, LispHashMap hashMap, LispValue key) => new LispBool(hashMap.Values.ContainsKey(key))),
-            ["assoc"] = LispPrimitive.DefineVarArg("assoc", (LispEnvironment _, LispHashMap hashMap, LispSequential values) =>
-            {
-                var result = hashMap.Values.ToDictionary();
-                foreach (var kvp in values.TuplesOf<LispValue, LispValue>())
-                    result[kvp.Item1] = kvp.Item2;
-                return new LispHashMap(result);
-            }),
-            ["dissoc"] = LispPrimitive.DefineVarArg("dissoc", (LispEnvironment _, LispHashMap hashMap, LispSequential keys) =>
-            {
-                var result = hashMap.Values.ToDictionary();
-                foreach (var key in keys.Values)
-                    result.Remove(key);
-                return new LispHashMap(result);
-            }),
+            ["assoc"] = LispPrimitive.DefineVarArg("assoc", (LispEnvironment _, LispHashMap hashMap, LispSequential values) => hashMap.Assoc(values.TuplesOf<LispValue, LispValue>())),
+            ["dissoc"] = LispPrimitive.DefineVarArg("dissoc", (LispEnvironment _, LispHashMap hashMap, LispSequential keys) => hashMap.Dissoc(keys.Values)),
             ["keys"] = LispPrimitive.Define("keys", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Keys)),
             ["values"] = LispPrimitive.Define("values", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Values)),
             ["get"] = LispPrimitive.Define("get", (LispEnvironment _, LispHashMap hashMap, LispValue key) => hashMap.Values.TryGetValue(key, out var value) ? value : new LispNil()),
@@ -143,7 +130,7 @@ public sealed class LispEnvironment
             ["print"] = LispPrimitive.DefineVarArg("print", (_, seq) => new LispString(string.Join(' ', seq.Values.Select(a => a.Print(true))))),
             ["apply"] = LispPrimitive.DefineVarArg("apply", (environment, seq) =>
             {
-                var args = seq.Values[1..^1].Concat(seq.GetAt<LispSequential>(seq.Count - 1).Values).ToList();
+                var args = seq.Values[1..^1].Concat(seq.GetAt<LispSequential>(seq.Count - 1).Values).ToArray();
                 return seq.GetAt<LispValue>(0).Eval(environment) switch
                 {
                     LispPrimitive primitive => primitive.Body(environment, new LispList(args)),
@@ -154,17 +141,22 @@ public sealed class LispEnvironment
             }),
 
             // String function
-            ["strcat"] = LispPrimitive.DefineVarArg("strcat", (_, seq) => new LispString(string.Join(string.Empty, seq.Values.Select(a => a.Print(false))))),
-            ["string<?"] = LispPrimitive.Define("string<?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) < 0)),
-            ["string>?"] = LispPrimitive.Define("string>?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) > 0)),
-            ["string<=?"] = LispPrimitive.Define("string<=?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) <= 0)),
-            ["string>=?"] = LispPrimitive.Define("string>=?", (LispEnvironment _, LispString lhs, LispString rhs) => new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) >= 0)),
+            ["strcat"] = LispPrimitive.DefineVarArg("strcat", (_, seq) => 
+                new LispString(string.Join(string.Empty, seq.Values.Select(a => a.Print(false))))),
+            ["string<?"] = LispPrimitive.Define("string<?", (LispEnvironment _, LispString lhs, LispString rhs) =>
+                new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) < 0)),
+            ["string>?"] = LispPrimitive.Define("string>?", (LispEnvironment _, LispString lhs, LispString rhs) =>
+                new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) > 0)),
+            ["string<=?"] = LispPrimitive.Define("string<=?", (LispEnvironment _, LispString lhs, LispString rhs) =>
+                new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) <= 0)),
+            ["string>=?"] = LispPrimitive.Define("string>=?", (LispEnvironment _, LispString lhs, LispString rhs) =>
+                new LispBool(string.Compare(lhs.Value, rhs.Value, StringComparison.InvariantCulture) >= 0)),
 
             // IO port functions
             ["file-open-read"] = LispPrimitive.Define("file-open-read", (LispEnvironment _, LispString filepath) =>
-                access.HasFlag(LispAccess.ReadFiles) ? new LispIoPort(filepath.Value, FileAccess.Read)  : throw new AccessDeniedException(LispAccess.ReadFiles)),
+                access.HasFlag(LispAccess.ReadFiles) ? new LispIoPort(filepath.Value, FileAccess.Read) : throw new AccessDeniedException(LispAccess.ReadFiles)),
             ["file-open-write"] = LispPrimitive.Define("file-open-write", (LispEnvironment _, LispString filepath) =>
-                access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write)  : throw new AccessDeniedException(LispAccess.WriteFiles)),
+                access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write) : throw new AccessDeniedException(LispAccess.WriteFiles)),
             ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
             ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
                 access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : new LispNil()) : throw new AccessDeniedException(LispAccess.ReadFiles)),
@@ -220,15 +212,15 @@ public sealed class LispEnvironment
         ReadEvaluatePrint($"(do {reader.ReadToEnd()}\nnil)\n");
     }
 
-    internal LispEnvironment (LispLambda lambda, IList<LispValue> arguments)
+    internal LispEnvironment (LispLambda lambda, LispValue[] arguments)
     {
         _parent = lambda.Environment;
         _values = [];
 
         Output = lambda.Environment.Output;
 
-        if (lambda.Arguments.Length != arguments.Count && lambda.VarArg is null)
-            throw new ArgumentCountException(lambda.Arguments.Length, arguments.Count);
+        if (lambda.Arguments.Length != arguments.Length && lambda.VarArg is null)
+            throw new ArgumentCountException(lambda.Arguments.Length, arguments.Length);
 
         foreach (var (name, value) in lambda.Arguments.Zip(arguments))
             _values[name.Value] = value;
@@ -270,8 +262,8 @@ public sealed class LispEnvironment
     /// </summary>
     /// <param name="name">The name of the primitive.</param>
     /// <param name="function">The function to be executed.</param>
-    public void Register (string name, Func<LispEnvironment, LispValue[], LispValue> function)
-        => _values[name] = LispPrimitive.DefineVarArg(name, (environment, arguments) => function(environment, arguments.Values));
+    public void Register (string name, Func<LispEnvironment, LispValue[], LispValue> function) =>
+        _values[name] = LispPrimitive.DefineVarArg(name, (environment, arguments) => function(environment, arguments.Values));
 
     /// <summary>
     /// Registers a primitive with a given name in this environment, and overwrites any previous definition.
@@ -332,8 +324,8 @@ public sealed class LispEnvironment
     /// </summary>
     /// <param name="name">The name of the primitive.</param>
     /// <param name="action">The action to be executed.</param>
-    public void Register (string name, Action<LispEnvironment, LispValue[]> action)
-        => _values[name] = LispPrimitive.DefineVarArg(name, (environment, arguments)=>
+    public void Register (string name, Action<LispEnvironment, LispValue[]> action) =>
+        _values[name] = LispPrimitive.DefineVarArg(name, (environment, arguments)=>
         {
             action(environment, arguments.Values);
             return new LispNil();
@@ -427,24 +419,21 @@ public sealed class LispEnvironment
     /// </summary>
     /// <param name="name">The name of the value.</param>
     /// <param name="value">The value.</param>
-    public void Register (string name, string value)
-        => _values[name] = new LispString(value);
+    public void Register (string name, string value) => _values[name] = new LispString(value);
 
     /// <summary>
     /// Registers a constant decimal value with a given name and overwrites any previous definition.
     /// </summary>
     /// <param name="name">The name of the value.</param>
     /// <param name="value">The value.</param>
-    public void Register (string name, decimal value)
-        => _values[name] = new LispNumber(value);
+    public void Register (string name, decimal value) => _values[name] = new LispNumber(value);
 
     /// <summary>
     /// Registers a constant bool value with a given name and overwrites any previous definition.
     /// </summary>
     /// <param name="name">The name of the value.</param>
     /// <param name="value">The value.</param>
-    public void Register(string name, bool value)
-        => _values[name] = new LispBool(value);
+    public void Register(string name, bool value) => _values[name] = new LispBool(value);
 
     /// <summary>
     /// Loads a lisp file and executes it in the root environment.

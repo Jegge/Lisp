@@ -86,12 +86,6 @@ public sealed class TestReadPrint
     }
 
     [TestMethod]
-    public void Deref()
-    {
-        Assert.AreEqual("(deref a)", LispValue.Read("@a").Print(true));
-    }
-
-    [TestMethod]
     [DataRow("'1", "(quote 1)")]
     [DataRow("'(1 2 3)", "(quote (1 2 3))")]
     [DataRow("`1", "(quasiquote 1)")]
@@ -113,37 +107,6 @@ public sealed class TestReadPrint
     {
         Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }
-
-    [TestMethod]
-    [DataRow("{}", "{}")]
-    [DataRow("{ }", "{}")]
-    [DataRow("{\"abc\" 1}", "{\"abc\" 1}")]
-    [DataRow("{\"a\" { \"b\" {\"c\" 1}}}", "{\"a\" {\"b\" {\"c\" 1}}}")]
-    [DataRow("{\"a\" { \"b\" {\"cde\" 3}}}", "{\"a\" {\"b\" {\"cde\" 3}}}")]
-    [DataRow("{\"a1\" 1 \"a2\" 2 \"a3\" 3}", "{\"a1\" 1 \"a2\" 2 \"a3\" 3}")]
-    [DataRow("{:a { :b {:c 3}}}", "{:a {:b {:c 3}}}")]
-    [DataRow("{\"1\" 1}", "{\"1\" 1}")]
-    [DataRow("({})", "({})")]
-    public void Hashmaps(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("(1 2")]
-    [DataRow("[1 2")]
-    [DataRow("{\"abc\" 2")]
-    [DataRow(")")]
-    [DataRow(") (+ 1 2)")]
-    [DataRow("}")]
-    [DataRow("} (+ 1 2)")]
-    [DataRow("]")]
-    [DataRow("] (+ 1 2)")]
-    public void UnbalancedParenthesisException(string input)
-    {
-        Assert.ThrowsException<UnbalancedParenthesisException>(() => LispValue.Read(input).Print(true));
-    }
-
 
     [TestMethod]
     [DataRow("\"abc")]

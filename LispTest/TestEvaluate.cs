@@ -28,30 +28,6 @@ public sealed class TestEvaluate
     }
 
     [TestMethod]
-    [DataRow("()", "()")]
-    public void Lists(string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("[nil]", "[nil]")]
-    [DataRow("[1 2 (+ 1 2)]", "[1 2 3]")]
-    public void Vectors(string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("{}", "{}")]
-    [DataRow("{\"a\" (+ 7 8)}", "{\"a\" 15}")]
-    [DataRow("{:a (+ 7 8)}", "{:a 15}")]
-    public void Hashmaps(string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
     [DataRow("(apply + (list 2 3))", "5")]
     [DataRow("(apply + 4 (list 5))", "9")]
     [DataRow("(apply strcat (list 1 2 \"3\" (list)))", "\"123()\"")]

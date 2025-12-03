@@ -20,6 +20,15 @@ public sealed class TestList
     }
 
     [TestMethod]
+    [DataRow("(1 2")]
+    [DataRow(")")]
+    [DataRow(") (+ 1 2)")]
+    public void UnbalancedParenthesisException(string input)
+    {
+        Assert.ThrowsException<UnbalancedParenthesisException>(() => LispValue.Read(input).Print(true));
+    }
+
+    [TestMethod]
     [DataRow("(list)", "()")]
     [DataRow("(list 1 2 3)", "(1 2 3)")]
     public void Construction (string input, string expected)

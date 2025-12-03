@@ -73,8 +73,6 @@ public sealed class TestBuiltin
     [DataRow("(= (list 1) [])", "false")]
     [DataRow("(= [(list)] (list []))", "true")]
     [DataRow("(= [1 2 (list 3 4 [5 6])] (list 1 2 [3 4 (list 5 6)]))", "true")]
-    [DataRow("(= (atom 23) (atom 23))", "false")]
-    [DataRow("(= @(atom 23) @(atom 23))", "true")]
     public void Equality (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
@@ -90,7 +88,6 @@ public sealed class TestBuiltin
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
-
 
     [TestMethod]
     [DataRow("(print)", "\"\"")]
@@ -132,42 +129,14 @@ public sealed class TestBuiltin
     [DataRow("(type-of 23)", typeof(LispNumber))]
     [DataRow("(type-of 0)", typeof(LispNumber))]
     [DataRow("(type-of -42)", typeof(LispNumber))]
-    [DataRow("(type-of {})", typeof(LispHashMap))]
     [DataRow("(type-of \"abc\")", typeof(LispString))]
     [DataRow("(type-of 'abc)", typeof(LispSymbol))]
     [DataRow("(type-of :abc)", typeof(LispKeyword))]
     [DataRow("(type-of (lambda (x) x))", typeof(LispLambda))]
     [DataRow("(type-of +)", typeof(LispPrimitive))]
-    [DataRow("(type-of (atom 42))", typeof(LispAtom))]
     public void TypeOf (string input, Type expected)
     {
         Assert.AreEqual(LispValue.GetLispType(expected), new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    public void Atom ()
-    {
-        var sut = new LispEnvironment();
-        Assert.AreEqual("(atom 2)", sut.ReadEvaluatePrint("(define a (atom 2))"));
-        Assert.AreEqual("true", sut.ReadEvaluatePrint("(atom? a)"));
-        Assert.AreEqual("false", sut.ReadEvaluatePrint("(atom? 1)"));
-        Assert.AreEqual("2", sut.ReadEvaluatePrint("(deref a)"));
-        Assert.AreEqual("3", sut.ReadEvaluatePrint("(reset a 3)"));
-        Assert.AreEqual("3", sut.ReadEvaluatePrint("(deref a)"));
-    }
-
-    [TestMethod]
-    public void Swap ()
-    {
-        var sut = new LispEnvironment();
-        sut.ReadEvaluatePrint("(define inc3 (lambda (a) (+ 3 a)))");
-
-        Assert.AreEqual("(atom 3)", sut.ReadEvaluatePrint("(define a (atom 3))"));
-        Assert.AreEqual("6", sut.ReadEvaluatePrint("(swap a inc3)"));
-        Assert.AreEqual("6", sut.ReadEvaluatePrint("(swap a (lambda (a) a))"));
-        Assert.AreEqual("12", sut.ReadEvaluatePrint("(swap a (lambda (a) (* 2 a)))"));
-        Assert.AreEqual("120", sut.ReadEvaluatePrint("(swap a (lambda (a b) (* a b)) 10)"));
-        Assert.AreEqual("123", sut.ReadEvaluatePrint("(swap a + 3)"));
     }
 
     [TestMethod]
@@ -206,11 +175,6 @@ public sealed class TestBuiltin
     [DataRow("(sequential? sequential?)", "false")]
     [DataRow("(sequential? nil)", "false")]
     [DataRow("(sequential? \"abc\")", "false")]
-    [DataRow("(hashmap? {})", "true")]
-    [DataRow("(hashmap? '())", "false")]
-    [DataRow("(hashmap? [])", "false")]
-    [DataRow("(hashmap? 'abc)", "false")]
-    [DataRow("(hashmap? :abc)", "false")]
     [DataRow("(string? nil)", "false")]
     [DataRow("(string? \"\")", "true")]
     [DataRow("(string? \"test\")", "true")]

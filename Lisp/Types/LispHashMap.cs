@@ -13,7 +13,23 @@ public sealed class LispHashMap(IDictionary<LispValue,LispValue> value) : LispCo
         public const string End = "}";
     }
     public IDictionary<LispValue,LispValue> Values { get; } = value;
-    public int Count => Values.Count;
+    public override int Count => Values.Count;
+
+    public LispHashMap Assoc (IEnumerable<(LispValue, LispValue)> values)
+    {
+        var result = Values.ToDictionary();
+        foreach (var kvp in values)
+            result[kvp.Item1] = kvp.Item2;
+        return new LispHashMap(result);
+    }
+    public LispHashMap Dissoc (IEnumerable<LispValue> keys)
+    {
+        var result = Values.ToDictionary();
+        foreach (var key in keys)
+            result.Remove(key);
+        return new LispHashMap(result);
+    }
+
     public override bool Equals(object? obj)
         => obj is LispHashMap other &&
            Values.Count == other.Values.Count &&

@@ -3,7 +3,7 @@ namespace Lisp.Types;
 public abstract class LispSequential (IEnumerable<LispValue> values) : LispContainer
 {
     public LispValue[] Values { get; } = values.ToArray();
-    public int Count => Values.Length;
+    public override int Count => Values.Length;
     public override bool Equals(object? obj)
         => obj is LispSequential other &&
            Values.Length == other.Values.Length &&

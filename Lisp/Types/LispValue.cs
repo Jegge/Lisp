@@ -63,7 +63,7 @@ public abstract class LispValue
                     }
                     catch (Exception exception)
                     {
-                        environment = new LispEnvironment(environment,  [(catchBinding, new LispString(exception.Message))]);
+                        environment = new LispEnvironment(environment, [(catchBinding, new LispString(exception.Message))]);
                         value = catchValue;
                         continue;
                     }
@@ -91,16 +91,16 @@ public abstract class LispValue
                 {
                     foreach (var item in list.Values[1..^1])
                         item.Eval(environment);
-                    value = list.Values.Last();
+                    value = list.Values.Last(); // gets evaluated in the next round, after the "continue"
                     continue;
                 }
+
                 case LispList { Values: [LispSymbol { Value: LispSymbol.Token.Do }, ..] } list:
                     throw new BadFormException(list);
 
                 // Special form: let
                 case LispList { Values: [LispSymbol { Value: LispSymbol.Token.Let }, LispSequential letListBindings, { } letListValue] }:
-                    environment = new LispEnvironment(environment,
-                    letListBindings.TuplesOf<LispSymbol, LispValue>().ToArray());
+                    environment = new LispEnvironment(environment, letListBindings.TuplesOf<LispSymbol, LispValue>().ToArray());
                     value = letListValue;
                     continue;
 
@@ -126,15 +126,17 @@ public abstract class LispValue
                     environment[binding] = result;
                     return result;
                 }
+
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.Define }, LispList { Values: [LispSymbol binding, ..] signature }, { } body ] }:
                 {
-                    var result = new LispLambda(signature[1..].Cast<LispSymbol>(), null, body, environment);
+                    var result = new LispLambda(new LispList(signature[1..]).As<LispSymbol>(), null, body, environment);
                     environment[binding] = result;
                     return result;
                 }
+
                 case LispList { Values: [LispSymbol { Value: LispSymbol.Token.Define }, LispDotList { Head: [LispSymbol binding, ..] signature, Tail: LispSymbol varArg }, { } body ] }:
                 {
-                    var result = new LispLambda(signature[1..].Cast<LispSymbol>(), varArg, body, environment);
+                    var result = new LispLambda(new LispList(signature[1..]).As<LispSymbol>(), varArg, body, environment);
                     environment[binding] = result;
                     return result;
                 }
@@ -160,17 +162,16 @@ public abstract class LispValue
                     return new LispLambda([], varArg, body, environment);
 
                 case LispList { Values: [LispSymbol { Value: LispLambda.Token }, LispDotList { Head: var bindings, Tail: LispSymbol varArg }, { } body] }:
-                    return new LispLambda(bindings.Cast<LispSymbol>(), varArg, body, environment);
+                    return new LispLambda(new LispList(bindings).As<LispSymbol>(), varArg, body, environment);
 
                 case LispList { Values: [LispSymbol { Value: LispLambda.Token }, LispSequential bindings, { } body] }:
-                    return new LispLambda(bindings.Values.Cast<LispSymbol>(), null, body, environment);
+                    return new LispLambda(bindings.As<LispSymbol>(), null, body, environment);
 
                 case LispList { Values: [LispSymbol { Value: LispLambda.Token }, ..] } list:
                     throw new BadFormException(list);
 
                 // Application
                 case LispList list:
-                {
                     if (list.Values.First().Eval(environment) is not LispApplicable applicable)
                         throw new BadFormException(list);
 
@@ -180,17 +181,15 @@ public abstract class LispValue
                             return primitive.Body(environment, new LispList(list.Values[1..].Select(v => v.Eval(environment))));
 
                         case LispLambda { IsMacro: false } function:
-                            environment = new LispEnvironment(function, list.Values.Skip(1).Select(v => v.Eval(environment)).ToList());
+                            environment = new LispEnvironment(function, list.Values[1..].Select(v => v.Eval(environment)).ToArray());
                             value = function.Body;
                             continue;
 
                         case LispLambda { IsMacro: true } macro:
-                            value = macro.Body.Eval(new LispEnvironment(macro, list.Values.Skip(1).ToList()));
+                            value = macro.Body.Eval(new LispEnvironment(macro, list.Values[1..]));
                             continue;
                     }
-
                     break;
-                }
 
                 default:
                     return value;

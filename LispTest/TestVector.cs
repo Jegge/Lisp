@@ -20,7 +20,18 @@ public sealed class TestVector
     }
 
     [TestMethod]
+    [DataRow("[1 2")]
+    [DataRow("]")]
+    [DataRow("] (+ 1 2)")]
+    public void UnbalancedParenthesisException(string input)
+    {
+        Assert.ThrowsException<UnbalancedParenthesisException>(() => LispValue.Read(input).Print(true));
+    }
+
+    [TestMethod]
     [DataRow("[]", "[]")]
+    [DataRow("[nil]", "[nil]")]
+    [DataRow("[1 2 (+ 1 2)]", "[1 2 3]")]
     [DataRow("(vec '(1 2 3))", "[1 2 3]")]
     [DataRow("(vec (list))", "[]")]
     [DataRow("(vec []))", "[]")]
