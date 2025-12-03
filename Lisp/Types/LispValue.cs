@@ -5,6 +5,8 @@ namespace Lisp.Types;
 
 public abstract class LispValue
 {
+    public static readonly LispValue Nil = new LispNil();
+
     internal static string GetLispType (Type type) => type.Name.Replace("Lisp", string.Empty).ToLowerInvariant();
     internal string GetLispType () => GetLispType(GetType());
     internal static string GetLispType<T> () where T : LispValue => GetLispType(typeof(T));

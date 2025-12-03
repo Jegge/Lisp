@@ -183,7 +183,7 @@ internal static class LispParser
             case "~@":
                 return new LispList(new LispSymbol(LispSymbol.Token.SpliceUnquote), tokens.Parse());
             case LispNil.Token:
-                return new LispNil();
+                return LispValue.Nil;
             case LispBool.Token.True:
                 return new LispBool(true);
             case LispBool.Token.False:

@@ -32,7 +32,7 @@ public sealed class LispEnvironment
             // Special variables
             ["argv"] = new LispList(argc.Select(LispValue (a) => new LispString(a))),
             ["core-version"] = new LispString(Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"),
-            ["DEBUG-EVAL"] = new LispNil(),
+            ["DEBUG-EVAL"] = LispValue.Nil,
             ["access"] = new LispList(Enum.GetValues<LispAccess>()
                                             .Where(f => f > 0 && (int)f < int.MaxValue && access.HasFlag(f))
                                             .Select(LispValue (f) => new LispKeyword(f))
@@ -83,13 +83,13 @@ public sealed class LispEnvironment
                 LispList list => list,
                 LispVector vector => new LispList(vector.Values),
                 LispString str => new LispList(str.Value.ToCharArray().Select(LispValue (c) => new LispString(c.ToString()))),
-                _ => (LispValue) new LispNil()
+                _ => LispValue.Nil
             }),
 
             // Sequence (aka List & Vector) functions
             ["cons"] = LispPrimitive.Define("cons", (LispEnvironment _, LispValue value, LispSequential seq) => new LispList(seq.Values.Prepend(value))),
             ["concat"] = LispPrimitive.DefineVarArg("concat", (_, seq) => new LispList(seq.As<LispSequential>().SelectMany(c => c.Values))),
-            ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? new LispNil()),
+            ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? LispValue.Nil),
             ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => new LispList(seq.Values.Skip(1))),
             ["nth"] = LispPrimitive.Define("nth", (LispEnvironment _, LispSequential seq, LispNumber index) => seq.Values[(int)index.Value]),
             ["list"] = LispPrimitive.DefineVarArg("list", (_, seq) => new LispList(seq.Values)),
@@ -118,7 +118,7 @@ public sealed class LispEnvironment
             ["dissoc"] = LispPrimitive.DefineVarArg("dissoc", (LispEnvironment _, LispHashMap hashMap, LispSequential keys) => hashMap.Dissoc(keys.Values)),
             ["keys"] = LispPrimitive.Define("keys", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Keys)),
             ["values"] = LispPrimitive.Define("values", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Values)),
-            ["get"] = LispPrimitive.Define("get", (LispEnvironment _, LispHashMap hashMap, LispValue key) => hashMap.Values.TryGetValue(key, out var value) ? value : new LispNil()),
+            ["get"] = LispPrimitive.Define("get", (LispEnvironment _, LispHashMap hashMap, LispValue key) => hashMap.Values.TryGetValue(key, out var value) ? value : LispValue.Nil),
 
             // Symbol functions
             ["symbol"] = LispPrimitive.Define("symbol", (LispEnvironment _, LispString name) => new LispSymbol(name.Value)),
@@ -159,7 +159,7 @@ public sealed class LispEnvironment
                 access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write) : throw new AccessDeniedException(LispAccess.WriteFiles)),
             ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
             ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
-                access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : new LispNil()) : throw new AccessDeniedException(LispAccess.ReadFiles)),
+                access.HasFlag(LispAccess.ReadFiles) ? (LispValue)(port.Read() is { } s ? new LispString(s) : LispValue.Nil) : throw new AccessDeniedException(LispAccess.ReadFiles)),
             ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) =>
                 !access.HasFlag(LispAccess.WriteFiles) ? throw new AccessDeniedException(LispAccess.WriteFiles) : new LispBool(port.Write(value.Value))),
             ["input-file?"] = LispPrimitive.Define("input-file?", (LispEnvironment _, LispValue value) => new LispBool(value is LispIoPort { Access: FileAccess.Read })),
@@ -169,12 +169,12 @@ public sealed class LispEnvironment
             ["prn"] = LispPrimitive.DefineVarArg("prn", (_, seq) =>
             {
                 Output?.WriteLine(string.Join(" ", seq.Values.Select(a => a.Print(true))));
-                return new LispNil();
+                return LispValue.Nil;
             }),
             ["println"] = LispPrimitive.DefineVarArg("prn", (_, seq) =>
             {
                 Output?.WriteLine(string.Join(" ", seq.Values.Select(a => a.Print(false))));
-                return new LispNil();
+                return LispValue.Nil;
             }),
             ["time-ms"] = LispPrimitive.Define("time-ms", _ => new LispNumber(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())),
             ["guid"] = LispPrimitive.Define("guid", _ => new LispString(Guid.NewGuid().ToString())),
@@ -328,7 +328,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.DefineVarArg(name, (environment, arguments)=>
         {
             action(environment, arguments.Values);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -341,7 +341,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, environment =>
         {
             action(environment);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -355,7 +355,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, (LispEnvironment environment, T1 arg1) =>
         {
             action(environment, arg1);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -369,7 +369,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, (LispEnvironment environment, T1 arg1, T2 arg2) =>
         {
             action(environment, arg1, arg2);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -383,7 +383,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, (LispEnvironment environment, T1 arg1, T2 arg2, T3 arg3) =>
         {
             action(environment, arg1, arg2, arg3);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -397,7 +397,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, (LispEnvironment environment, T1 arg1, T2 arg2, T3 arg3, T4 arg4) =>
         {
             action(environment, arg1, arg2, arg3, arg4);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>
@@ -411,7 +411,7 @@ public sealed class LispEnvironment
         _values[name] = LispPrimitive.Define(name, (LispEnvironment environment, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) =>
         {
             action(environment, arg1, arg2, arg3, arg4, arg5);
-            return new LispNil();
+            return LispValue.Nil;
         });
 
     /// <summary>

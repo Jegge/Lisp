@@ -54,7 +54,7 @@ environment.Register("read-json", (LispEnvironment env, LispString content) =>
             JsonValueKind.Number => new LispNumber(element.GetDecimal()),
             JsonValueKind.True => new LispBool(true),
             JsonValueKind.False => new LispBool(false),
-            JsonValueKind.Null or JsonValueKind.Undefined => new LispNil(),
+            JsonValueKind.Null or JsonValueKind.Undefined => LispValue.Nil,
             _ => throw new NotSupportedException($"Unsupported JsonValueKind {element.ValueKind}")
         };
 });
@@ -62,7 +62,7 @@ environment.Register("read-json", (LispEnvironment env, LispString content) =>
 environment.Register("write-json", (LispEnvironment _, LispValue content) =>
 {
     var node = ToJsonNode(content);
-    return node is null ? new LispNil() : new LispString(node.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    return node is null ? LispValue.Nil : new LispString(node.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
 
     JsonNode? ToJsonNode (LispValue value) =>
         value switch
