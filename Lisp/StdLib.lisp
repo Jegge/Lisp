@@ -29,17 +29,19 @@
 
 (define (abs x) (if (< x 0) (* -1 x) x))
 
+(define (second xs) (first (rest xs)))
+
 ; right fold
-(define (foldr func end lst)
-    (if (null? lst)
+(define (foldr func end xs)
+    (if (null? xs)
         end
-        (func (first lst) (foldr func end (rest lst)))))
+        (func (first xs) (foldr func end (rest xs)))))
 
 ; left fold
-(define (foldl func accum lst)
-    (if (null? lst)
+(define (foldl func accum xs)
+    (if (null? xs)
         accum
-        (foldl func (func accum (first lst)) (rest lst))))
+        (foldl func (func accum (first xs)) (rest xs))))
 
 (define fold foldl)
 (define reduce foldr)
@@ -49,15 +51,21 @@
         (cons init '())
         (cons init (unfold func (func init) pred))))
 
-(define (sum . lst) (fold + 0 lst))
-(define (product . lst) (fold * 1 lst))
-(define (and . lst) (fold && true lst))
-(define (or . lst) (fold || false lst))
+(define (sum . xs) (fold + 0 xs))
+(define (product . xs) (fold * 1 xs))
+(define (and . xs) (fold && true xs))
+(define (or . xs) (fold || false xs))
 
-(define (any? pred sequence) (or (map pred sequence)))
-(define (every? pred sequence) (and (map pred sequence)))
-(define (map func sequence) (foldr (lambda (x y) (cons (func x) y)) '() sequence))
-(define (filter pred sequence) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() sequence))
+
+(define (map func xs) (foldr (lambda (x y) (cons (func x) y)) '() xs))
+(define (filter pred xs) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() xs))
+(define (zip xs ys) 
+    (if (|| (null? xs) (null? ys)) 
+        '() 
+        (cons (list (first xs) (first ys)) (zip (rest xs) (rest ys)))))
+
+(define (any? pred . xs) (apply or (map pred xs)))
+(define (every? pred . xs) (apply and (map pred xs)))
 (define (max first . rest) (fold (lambda (old new) (if (> old new) old new)) first rest))
 (define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
 

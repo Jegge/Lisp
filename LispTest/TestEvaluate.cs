@@ -1,4 +1,5 @@
 ﻿using Lisp;
+using Lisp.Parser;
 
 namespace LispTest;
 
@@ -10,6 +11,67 @@ public sealed class TestEvaluate
     [DataRow(" ; whole line comment (not an exception)\n1 ; comment after expression", "1")]
     [DataRow("1; &()*+,-./:;<=>?@[]^_{|}~", "1")]
     public void SkipsComments(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    public void CommaAsWhitespace ()
+    {
+        Assert.AreEqual("(1 2 3)", LispReader.Read("(1 2, 3, ,,,,),,").Print(true));
+    }
+    
+    [TestMethod]
+    [DataRow("(not false)", "true")]
+    [DataRow("(not nil)", "true")]
+    [DataRow("(not true)", "false")]
+    [DataRow("(not \"a\")", "false")]
+    [DataRow("(not 0)", "false")]
+    public void Not (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(read \"(1 2 (3 4) nil)\")", "(1 2 (3 4) nil)")]
+    [DataRow("(= nil (read \"nil\"))", "true")]
+    [DataRow("(read \"(+ 2 3)\")", "(+ 2 3)")]
+    [DataRow("(read \"\\\"\\n\\\"\")", "\"\\n\"")]
+    [DataRow("(read \"7 ;; comment\")", "7")]
+    public void ReadString (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(print)", "\"\"")]
+    [DataRow("(print \"\")", "\"\\\"\\\"\"")]
+    [DataRow("(print \"abc\")", "\"\\\"abc\\\"\"")]
+    [DataRow("(print \"abc  def\" \"ghi jkl\")", "\"\\\"abc  def\\\" \\\"ghi jkl\\\"\"")]
+    [DataRow("(print \"\\\"\")", "\"\\\"\\\\\\\"\\\"\"")]
+    [DataRow("(print (list 1 2 \"abc\" \"\\\"\") \"def\")", "\"(1 2 \\\"abc\\\" \\\"\\\\\\\"\\\") \\\"def\\\"\"")]
+    [DataRow("(print \"abc\\ndef\\nghi\")", "\"\\\"abc\\\\ndef\\\\nghi\\\"\"")]
+    [DataRow("(print \"abc\\\\def\\\\ghi\")", "\"\\\"abc\\\\\\\\def\\\\\\\\ghi\\\"\"")]
+    [DataRow("(print [1 2 \"abc\" \"\\\"\"] \"def\")", "\"[1 2 \\\"abc\\\" \\\"\\\\\\\"\\\"] \\\"def\\\"\"")]
+    [DataRow("(print [])", "\"[]\"")]
+    public void Print (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+    [TestMethod]
+    [DataRow("(strcat)", "\"\"")]
+    [DataRow("(strcat \"\")", "\"\"")]
+    [DataRow("(strcat \"abc\")", "\"abc\"")]
+    [DataRow("(strcat \"\\\"\")", "\"\\\"\"")]
+    [DataRow("(strcat 1 \"abc\" 3)", "\"1abc3\"")]
+    [DataRow("(strcat \"abc  def\" \"ghi jkl\")", "\"abc  defghi jkl\"")]
+    [DataRow("(strcat \"abc\\ndef\\nghi\")", "\"abc\\ndef\\nghi\"")]
+    [DataRow("(strcat \"abc\\\\def\\\\ghi\")", "\"abc\\\\def\\\\ghi\"")]
+    [DataRow("(strcat (list 1 2 \"abc\" \"\\\"\") \"def\")", "\"(1 2 abc \\\")def\"")]
+    [DataRow("(strcat (list))", "\"()\"")]
+    [DataRow("(strcat [1 2 \"abc\" \"\\\"\"] \"def\")", "\"[1 2 abc \\\"]def\"")]
+    [DataRow("(strcat [])", "\"[]\"")]
+    public void Strcat (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
@@ -111,5 +173,19 @@ public sealed class TestEvaluate
     {
         const string quine = "((lambda (q) (quasiquote ((unquote q) (quote (unquote q))))) (quote (lambda (q) (quasiquote ((unquote q) (quote (unquote q)))))))";
         Assert.AreEqual(quine, new LispEnvironment().ReadEvaluatePrint(quine));
+    }
+
+    [TestMethod]
+    public void SymbolNotFoundException()
+    {
+        Assert.ThrowsException<SymbolNotFoundException>(() => new LispEnvironment().ReadEvaluatePrint("(abc 1 2 3)"));
+    }
+
+    [TestMethod]
+    public void CommandLineArguments ()
+    {
+        Assert.AreEqual("()", new LispEnvironment().ReadEvaluatePrint("argv"));
+        Assert.AreEqual("(\"foo\")", new LispEnvironment(["foo"]).ReadEvaluatePrint("argv"));
+        Assert.AreEqual("(\"foo\" \"bar\")", new LispEnvironment(["foo", "bar"]).ReadEvaluatePrint("argv"));
     }
 }

@@ -6,7 +6,6 @@ namespace LispTest;
 [TestClass]
 public sealed class TestQuote
 {
-
     [TestMethod]
     [DataRow("'1", "(quote 1)")]
     [DataRow("'(1 2 3)", "(quote (1 2 3))")]

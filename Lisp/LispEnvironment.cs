@@ -88,7 +88,7 @@ public sealed class LispEnvironment
             }),
 
             // Sequence (aka List & Vector) functions
-            ["cons"] = LispPrimitive.Define("cons", (LispEnvironment _, LispValue value, LispSequential seq) => new LispList(seq.Values.Prepend(value))),
+            ["cons"] = LispPrimitive.Define("cons", (LispEnvironment _, LispValue head, LispSequential tail) => new LispList(tail.Values.Prepend(head))),
             ["concat"] = LispPrimitive.DefineVarArg("concat", (_, seq) => new LispList(seq.As<LispSequential>().SelectMany(c => c.Values))),
             ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? LispValue.Nil),
             ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => new LispList(seq.Values.Skip(1))),

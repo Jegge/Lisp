@@ -1,4 +1,5 @@
 ﻿using Lisp;
+using Lisp.Types;
 
 namespace LispTest;
 
@@ -47,6 +48,41 @@ public sealed class TestMacro
     [DataRow("(let (x (cond false \"no\" true \"yes\")) x)", "\"yes\"")]
     [DataRow("(let [x (cond false \"no\" true \"yes\")] x)", "\"yes\"")]
     public void Cond (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(type-of (define-macro test (lambda xs '())))", typeof(LispLambda))]
+    [DataRow("(type-of (lambda (x) x))", typeof(LispLambda))]
+    [DataRow("(type-of +)", typeof(LispPrimitive))]
+    public void TypeOf (string input, Type expected)
+    {
+        Assert.AreEqual(LispValue.GetLispType(expected), new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(lambda? (define (test) '()))", "true")]
+    [DataRow("(lambda? (define-macro test (lambda xs '())))", "true")]
+    [DataRow("(lambda? nil)", "false")]
+    [DataRow("(lambda? false)", "false")]
+    [DataRow("(lambda? true)", "false")]
+    [DataRow("(lambda? 0)", "false")]
+    [DataRow("(lambda? '())", "false")]
+    [DataRow("(lambda? [])", "false")]
+    [DataRow("(lambda? {})", "false")]
+    [DataRow("(lambda? \"\")", "false")]
+    [DataRow("(macro? (define (test) '()))", "false")]
+    [DataRow("(macro? (define-macro test (lambda xs '())))", "true")]
+    [DataRow("(macro? nil)", "false")]
+    [DataRow("(macro? false)", "false")]
+    [DataRow("(macro? true)", "false")]
+    [DataRow("(macro? 0)", "false")]
+    [DataRow("(macro? '())", "false")]
+    [DataRow("(macro? [])", "false")]
+    [DataRow("(macro? {})", "false")]
+    [DataRow("(macro? \"\")", "false")]
+    public void IsType (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
