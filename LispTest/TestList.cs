@@ -47,6 +47,7 @@ public sealed class TestList
     [DataRow("(list? :a)", "false")]
     [DataRow("(list? false)", "false")]
     [DataRow("(sequential? '(1 2 3))", "true")]
+    [DataRow("(sequential? (list 1 2 3))", "true")]
     public void IsList (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);

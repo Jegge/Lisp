@@ -58,10 +58,10 @@ public sealed class TestVector
     }
 
     [TestMethod]
-    [DataRow("(sequential? '(1 2 3))", "true")]
     [DataRow("(list? [1 2 3])", "false")]
     [DataRow("(vector? [1 2 3])", "true")]
     [DataRow("(vector? [1 2 3])", "true")]
+    [DataRow("(sequential? [15])", "true")]
     public void IsType (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);

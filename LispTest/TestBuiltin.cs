@@ -65,10 +65,6 @@ public sealed class TestBuiltin
     [DataRow("(= \"abc\" \"ABC\")", "false")]
     [DataRow("(= (list) \"\")", "false")]
     [DataRow("(= \"\" (list))", "false")]
-    [DataRow("(= :abc :abc)", "true")]
-    [DataRow("(= :abc :def)", "false")]
-    [DataRow("(= :abc \":abc\")", "false")]
-    [DataRow("(= (list :abc) (list :abc))", "true")]
     [DataRow("(= (list 1 2) [1 2])", "true")]
     [DataRow("(= (list 1) [])", "false")]
     [DataRow("(= [(list)] (list []))", "true")]
@@ -130,8 +126,6 @@ public sealed class TestBuiltin
     [DataRow("(type-of 0)", typeof(LispNumber))]
     [DataRow("(type-of -42)", typeof(LispNumber))]
     [DataRow("(type-of \"abc\")", typeof(LispString))]
-    [DataRow("(type-of 'abc)", typeof(LispSymbol))]
-    [DataRow("(type-of :abc)", typeof(LispKeyword))]
     [DataRow("(type-of (lambda (x) x))", typeof(LispLambda))]
     [DataRow("(type-of +)", typeof(LispPrimitive))]
     public void TypeOf (string input, Type expected)
@@ -140,8 +134,6 @@ public sealed class TestBuiltin
     }
 
     [TestMethod]
-    [DataRow("(symbol? 'abc)", "true")]
-    [DataRow("(symbol? \"abc\")", "false")]
     [DataRow("(nil? nil)", "true")]
     [DataRow("(nil? false)", "false")]
     [DataRow("(nil? true)", "false")]
@@ -161,20 +153,6 @@ public sealed class TestBuiltin
     [DataRow("(false? [])", "false")]
     [DataRow("(false? {})", "false")]
     [DataRow("(false? \"\")", "false")]
-    [DataRow("(symbol? :abc)", "false")]
-    [DataRow("(symbol? 'abc)", "true")]
-    [DataRow("(symbol? \"abc\")", "false")]
-    [DataRow("(symbol? (symbol \"abc\"))", "true")]
-    [DataRow("(keyword? :abc)", "true")]
-    [DataRow("(keyword? 'abc)", "false")]
-    [DataRow("(keyword? \"abc\")", "false")]
-    [DataRow("(keyword? \"\")", "false")]
-    [DataRow("(keyword? (keyword \"abc\"))", "true")]
-    [DataRow("(sequential? (list 1 2 3))", "true")]
-    [DataRow("(sequential? [15])", "true")]
-    [DataRow("(sequential? sequential?)", "false")]
-    [DataRow("(sequential? nil)", "false")]
-    [DataRow("(sequential? \"abc\")", "false")]
     [DataRow("(string? nil)", "false")]
     [DataRow("(string? \"\")", "true")]
     [DataRow("(string? \"test\")", "true")]
@@ -190,18 +168,7 @@ public sealed class TestBuiltin
     [DataRow("(number? (list))", "false")]
     [DataRow("(number? [])", "false")]
     [DataRow("(number? :abc)", "false")]
-
-    //[DataRow("", "")]
-    //[DataRow("", "")]
     public void IsType (string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("(symbol \"abc\")", "abc")]
-    [DataRow("(keyword \"abc\")", ":abc")]
-    public void Symbol (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }

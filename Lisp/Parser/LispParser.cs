@@ -165,7 +165,7 @@ internal static class LispParser
                 return (list.Count(c => c is LispSymbol { Value: LispDotList.Token.Dot }), list) switch
                 {
                     (0, _) => new LispList(list),
-                    (1, [.., not null, LispSymbol { Value: LispDotList.Token.Dot }, { } tail]) => new LispDotList(list[..^2], list.Last()),
+                    (1, [.., not null, LispSymbol { Value: LispDotList.Token.Dot }, not null]) => new LispDotList(list[..^2], list.Last()),
                     _ => throw new UnbalancedParenthesisException(token.Value, token.Line, token.Column)
                 };
             case LispVector.Token.Begin:

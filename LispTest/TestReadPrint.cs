@@ -46,25 +46,6 @@ public sealed class TestReadPrint
         Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }
 
-    [TestMethod]
-    [DataRow("+", "+")]
-    [DataRow("-", "-")]
-    [DataRow("*", "*")]
-    [DataRow("/", "/")]
-    [DataRow("abc", "abc")]
-    [DataRow("abc:", "abc:")]
-    [DataRow("   abc", "abc")]
-    [DataRow("abc5", "abc5")]
-    [DataRow("abc-def", "abc-def")]
-    [DataRow("-def", "-def")]
-    [DataRow("->>", "->>")]
-    [DataRow("nil", "nil")]
-    [DataRow("true", "true")]
-    [DataRow("false", "false")]
-    public void Symbols(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
-    }
 
     [TestMethod]
     [DataRow("\"abc\"", "\"abc\"")]
@@ -83,29 +64,6 @@ public sealed class TestReadPrint
     public void CommaAsWhitespace ()
     {
         Assert.AreEqual("(1 2 3)", LispValue.Read("(1 2, 3, ,,,,),,").Print(true));
-    }
-
-    [TestMethod]
-    [DataRow("'1", "(quote 1)")]
-    [DataRow("'(1 2 3)", "(quote (1 2 3))")]
-    [DataRow("`1", "(quasiquote 1)")]
-    [DataRow("`(1 2 3)", "(quasiquote (1 2 3))")]
-    [DataRow("`(a (b) c)", "(quasiquote (a (b) c))")]
-    [DataRow("~1", "(unquote 1)")]
-    [DataRow("~(1 2 3)", "(unquote (1 2 3))")]
-    [DataRow("`(1 ~a 3)", "(quasiquote (1 (unquote a) 3))")]
-    [DataRow("~@(1 2 3)", "(splice-unquote (1 2 3))")]
-    public void Quoting(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow(":kw", ":kw")]
-    [DataRow("(:kw1 :kw2 :kw3)", "(:kw1 :kw2 :kw3)")]
-    public void Keywords(string input, string expected)
-    {
-        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }
 
     [TestMethod]

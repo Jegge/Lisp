@@ -20,7 +20,7 @@ public sealed class TestHashMap
     {
         Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
     }
-    
+
     [TestMethod]
     [DataRow("{\"abc\" 2")]
     [DataRow("}")]

@@ -1,10 +1,27 @@
 ﻿using Lisp;
+using Lisp.Types;
 
 namespace LispTest;
 
 [TestClass]
 public sealed class TestQuote
 {
+
+    [TestMethod]
+    [DataRow("'1", "(quote 1)")]
+    [DataRow("'(1 2 3)", "(quote (1 2 3))")]
+    [DataRow("`1", "(quasiquote 1)")]
+    [DataRow("`(1 2 3)", "(quasiquote (1 2 3))")]
+    [DataRow("`(a (b) c)", "(quasiquote (a (b) c))")]
+    [DataRow("~1", "(unquote 1)")]
+    [DataRow("~(1 2 3)", "(unquote (1 2 3))")]
+    [DataRow("`(1 ~a 3)", "(quasiquote (1 (unquote a) 3))")]
+    [DataRow("~@(1 2 3)", "(splice-unquote (1 2 3))")]
+    public void ReadAndWrite (string input, string expected)
+    {
+        Assert.AreEqual(expected, LispValue.Read(input).Print(true), "input:<{0}>", input);
+    }
+
     [TestMethod]
     [DataRow("(quote 7)", "7")]
     [DataRow("(quote (1 2 3))", "(1 2 3)")]
