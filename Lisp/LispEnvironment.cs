@@ -40,19 +40,7 @@ public sealed class LispEnvironment
             ),
 
             // Special system functions
-            ["env"] = LispPrimitive.Define("env", environment =>
-            {
-                var result = new Dictionary<LispValue, LispValue>();
-                var current = environment;
-                while (current is not null)
-                {
-                    foreach (var entry in current._values)
-                        if (!result.ContainsKey(new LispSymbol(entry.Key)))
-                            result[new LispSymbol(entry.Key)] = entry.Value;
-                    current = current._parent;
-                }
-                return new LispHashMap(result);
-            }),
+            ["env"] = LispPrimitive.Define("env", environment => new LispHashMap(environment.AllDefinitions)),
             ["type-of"] = LispPrimitive.Define("type-of", (LispEnvironment _, LispValue value) => new LispSymbol(value.GetLispType())),
             ["nil?"] = LispPrimitive.Define("nil?", (LispEnvironment _, LispValue value) => new LispBool(value is LispNil)),
             ["lambda?"] = LispPrimitive.Define("lambda?", (LispEnvironment _, LispValue value) => new LispBool(value is LispApplicable)),
@@ -78,27 +66,29 @@ public sealed class LispEnvironment
             [">="] = LispPrimitive.Define(">=", (lhs, rhs) => lhs >= rhs),
 
             // Conversions
+            // sequential to vector
             ["vec"] = LispPrimitive.Define("vec", (LispEnvironment _, LispSequential arg) => new LispVector(arg.Values)),
+            // vector or string to list
             ["seq"] = LispPrimitive.Define("seq", (LispEnvironment _, LispValue arg) => arg switch
             {
                 LispList list => list,
                 LispVector vector => new LispList(vector.Values),
                 LispString str => new LispList(str.Value.ToCharArray().Select(LispValue (c) => new LispString(c.ToString()))),
-                _ => LispValue.Nil
+                _ => throw new TypeMismatchException<LispList, LispVector, LispString>(arg)
             }),
 
             // Sequence (aka List & Vector) functions
             ["cons"] = LispPrimitive.Define("cons", (LispEnvironment _, LispValue head, LispSequential tail) => new LispList(tail.Values.Prepend(head))),
             ["concat"] = LispPrimitive.DefineVarArg("concat", (_, seq) => new LispList(seq.As<LispSequential>().SelectMany(c => c.Values))),
-            ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.FirstOrDefault() ?? LispValue.Nil),
-            ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => new LispList(seq.Values.Skip(1))),
+            ["first"] = LispPrimitive.Define("first", (LispEnvironment _, LispSequential seq) => seq.Values.Length > 0 ? seq.Values[0] : LispValue.Nil),
+            ["rest"] = LispPrimitive.Define("rest", (LispEnvironment _, LispSequential seq) => seq.Values.Length > 0 ? new LispList(seq.Values[1..]) : new LispList()),
             ["nth"] = LispPrimitive.Define("nth", (LispEnvironment _, LispSequential seq, LispNumber index) => seq.Values[(int)index.Value]),
-            ["list"] = LispPrimitive.DefineVarArg("list", (_, seq) => new LispList(seq.Values)),
             ["vector"] = LispPrimitive.DefineVarArg("vector", (_, seq) => new LispVector(seq.Values)),
 
             // Container (aka List, Vector, Hashmap) functions
             ["null?"] = LispPrimitive.Define("null?", (LispEnvironment _, LispContainer container) => new LispBool(container.Count == 0)),
             ["length"] = LispPrimitive.Define("length", (LispEnvironment _, LispContainer container) => new LispNumber(container.Count)),
+            ["contains?"] = LispPrimitive.Define("contains?", (LispEnvironment _, LispContainer container, LispValue value) => new LispBool(container.Contains(value))),
 
             // Atom functions
             ["atom"] = LispPrimitive.Define("atom", (LispEnvironment _, LispValue value) => new LispAtom(value)),
@@ -114,7 +104,7 @@ public sealed class LispEnvironment
 
             // Hashmap functions
             ["hashmap"] = LispPrimitive.DefineVarArg("hashmap", (_, values) => new LispHashMap(values.TuplesOf<LispValue, LispValue>().ToDictionary())),
-            ["contains?"] = LispPrimitive.Define("contains?", (LispEnvironment _, LispHashMap hashMap, LispValue key) => new LispBool(hashMap.Values.ContainsKey(key))),
+            ["contains-key?"] = LispPrimitive.Define("contains-key?", (LispEnvironment _, LispHashMap hashMap, LispValue key) => new LispBool(hashMap.Values.ContainsKey(key))),
             ["assoc"] = LispPrimitive.DefineVarArg("assoc", (LispEnvironment _, LispHashMap hashMap, LispSequential values) => hashMap.Assoc(values.TuplesOf<LispValue, LispValue>())),
             ["dissoc"] = LispPrimitive.DefineVarArg("dissoc", (LispEnvironment _, LispHashMap hashMap, LispSequential keys) => hashMap.Dissoc(keys.Values)),
             ["keys"] = LispPrimitive.Define("keys", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Keys)),
@@ -123,6 +113,8 @@ public sealed class LispEnvironment
 
             // Symbol functions
             ["symbol"] = LispPrimitive.Define("symbol", (LispEnvironment _, LispString name) => new LispSymbol(name.Value)),
+
+            // Keyword functions
             ["keyword"] = LispPrimitive.Define("keyword", (LispEnvironment _, LispString name) => new LispKeyword(name.Value)),
 
             // Core read / eval / print / apply functions
@@ -137,11 +129,11 @@ public sealed class LispEnvironment
                     LispPrimitive primitive => primitive.Body(environment, new LispList(args)),
                     LispLambda { IsMacro: true } macro => macro.Body.Eval(new LispEnvironment(macro, args)),
                     LispLambda function => function.Body.Eval(new LispEnvironment(function, args)),
-                    _ => throw new BadFormException(new LispList(seq))
+                    var value => throw new TypeMismatchException<LispPrimitive, LispLambda>(value)
                 };
             }),
 
-            // String function
+            // String functions
             ["strcat"] = LispPrimitive.DefineVarArg("strcat", (_, seq) =>
                 new LispString(string.Join(string.Empty, seq.Values.Select(a => a.Print(false))))),
             ["string<?"] = LispPrimitive.Define("string<?", (LispEnvironment _, LispString lhs, LispString rhs) =>
@@ -250,6 +242,24 @@ public sealed class LispEnvironment
 
     internal bool ContainsSymbol (LispSymbol symbol) =>
         _values.ContainsKey(symbol.Value) || (_parent?.ContainsSymbol(symbol) ?? false);
+
+    private Dictionary<LispValue, LispValue> AllDefinitions
+    {
+        get
+        {
+            var result = new Dictionary<LispValue, LispValue>();
+            var current = this;
+            while (current is not null)
+            {
+                foreach (var entry in current._values)
+                    if (!result.ContainsKey(new LispSymbol(entry.Key)))
+                        result[new LispSymbol(entry.Key)] = entry.Value;
+                current = current._parent;
+            }
+
+            return result;
+        }
+    }
 
     /// <summary>
     /// Read the content of the current environment

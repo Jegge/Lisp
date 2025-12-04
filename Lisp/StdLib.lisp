@@ -14,6 +14,9 @@
 ; composes two functions
 (define (compose f g) (lambda (arg) (f (apply g arg))))
 
+; create a list from arguments
+(define (list . xs) xs)
+
 (define zero? (curry = 0))
 (define positive? (curry < 0))
 (define negative? (curry > 0))
@@ -56,9 +59,10 @@
 (define (and . xs) (fold && true xs))
 (define (or . xs) (fold || false xs))
 
-
 (define (map func xs) (foldr (lambda (x y) (cons (func x) y)) '() xs))
+
 (define (filter pred xs) (foldr (lambda (x y) (if (pred x) (cons x y) y)) '() xs))
+
 (define (zip xs ys) 
     (if (|| (null? xs) (null? ys)) 
         '() 
@@ -123,3 +127,11 @@
             (cons start (range (+ start step) stop step)) 
             (list))
     ))
+    
+;(define (range start stop step)
+;    (cond (= step 0) (throw "step can not be 0")
+;          (> step 0) (unfold (lambda (x) (+ x step)) start (lambda (x) (>= x stop)))
+;          (< step 0) (unfold (lambda (x) (- x step)) start (lambda (x) (<= x stop)))
+;    ))
+
+(define (quit) (exit 0))

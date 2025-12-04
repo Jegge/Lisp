@@ -4,6 +4,8 @@ public abstract class LispSequential (IEnumerable<LispValue> values) : LispConta
 {
     public LispValue[] Values { get; } = values.ToArray();
     public override int Count => Values.Length;
+    public override bool Contains (LispValue value) => Values.Contains(value);
+
     public override bool Equals(object? obj)
         => obj is LispSequential other &&
            Values.Length == other.Values.Length &&

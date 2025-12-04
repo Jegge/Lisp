@@ -98,7 +98,7 @@ if (executable is not null)
 else
 {
     Console.WriteLine($"Welcome to lisp version {version}.");
-    Console.WriteLine("Type (exit 0) to quit, Ctrl-C to abort.");
+    Console.WriteLine("Type (quit) to quit, Ctrl-C to abort.");
     Console.WriteLine();
 
     while (true)
