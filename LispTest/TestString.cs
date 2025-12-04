@@ -15,6 +15,7 @@ public sealed class TestString
     [DataRow("\"abc\\tdef\"", "\"abc\\tdef\"")]
     [DataRow("\"\"", "\"\"")]
     [DataRow("\"abc\\ndef\"", "\"abc\\ndef\"")]
+    [DataRow("\"abc\\rdef\"", "\"abc\\rdef\"")]
     public void ReadAndPrint (string input, string expected)
     {
         Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
@@ -77,6 +78,7 @@ public sealed class TestString
     [TestMethod]
     [DataRow("\"abc")]
     [DataRow("\"")]
+    [DataRow("\"\\")]
     [DataRow("\"\\\"")]
     [DataRow("\"\\\\\\\"")]
     [DataRow("(\"abc")]

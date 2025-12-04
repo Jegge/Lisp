@@ -21,7 +21,7 @@ public abstract class LispSequential (IEnumerable<LispValue> values) : LispConta
     }
     internal IEnumerable<(T1, T2)> TuplesOf<T1, T2> () where T1 : LispValue where T2 : LispValue
     {
-        if (Values.Length == 0 || Values.Length % 2 == 1)
+        if (Values.Length % 2 == 1)
             throw new RuntimeException("Expected even number of arguments");
         for (var i = 0; i < Values.Length; i += 2)
             yield return (GetAt<T1>(i), GetAt<T2>(i + 1));

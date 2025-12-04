@@ -19,8 +19,12 @@ public static class LispReader
                 _ = reader.Read();
                 switch (reader.Read())
                 {
-                    case -1:
-                        return null;
+                    // this is a very special case: we append a '\n' at the end of our input string to make parsing easier
+                    // So, if this \n occurs right after a stray '\\', we have to check for the end separately
+                    case '\n':
+                        if (reader.Peek() == -1)
+                            return null;
+                        break;
                     case 't':
                         buffer.Append('\t');
                         break;

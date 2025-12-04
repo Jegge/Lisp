@@ -18,6 +18,19 @@ public sealed class TestNumber
     }
 
     [TestMethod]
+    [DataRow("(+ 1 2)", "3")]
+    [DataRow("(+ 5 (* 2 3))", "11")]
+    [DataRow("(- (+ 5 (* 2 3)) 3)", "8")]
+    [DataRow("(/ (- (+ 5 (* 2 3)) 3) 4)", "2")]
+    [DataRow("(/ (- (+ 515 (* 87 311)) 302) 27)", "1010")]
+    [DataRow("(* -3 6)", "-18")]
+    [DataRow("(/ (- (+ 515 (* -87 311)) 296) 27)", "-994")]
+    public void Primitives (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
     [DataRow("(> 2 1)", "true")]
     [DataRow("(> 1 1)", "false")]
     [DataRow("(> 1 2)", "false")]

@@ -32,9 +32,20 @@ public sealed class TestHashMap
     }
 
     [TestMethod]
+    [DataRow("{\"abc\" }")]
+    [DataRow("{\"abc\"")]
+    public void UnexpectedEndOfInputException (string input)
+    {
+        Assert.ThrowsException<UnexpectedEndOfInputException>(() => LispReader.Read(input).Print(true));
+    }
+
+
+    [TestMethod]
     [DataRow("{}", "{}")]
     [DataRow("{\"a\" (+ 7 8)}", "{\"a\" 15}")]
     [DataRow("{:a (+ 7 8)}", "{:a 15}")]
+    [DataRow("(hashmap)", "{}")]
+    [DataRow("(hashmap :a 42)", "{:a 42}")]
     public void Construction (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
@@ -89,4 +100,75 @@ public sealed class TestHashMap
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
+
+    [TestMethod]
+    [DataRow("(contains-key? {} :a)", "false")]
+    [DataRow("(contains-key? { :b 23 } :a)", "false")]
+    [DataRow("(contains-key? { :b 23 } :b)", "true")]
+    public void ContainsKey (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(contains? {} :a)", "false")]
+    [DataRow("(contains? { :b 23 } :a)", "false")]
+    [DataRow("(contains? { :b 23 } :b)", "false")]
+    [DataRow("(contains? { :b 23 } 23)", "true")]
+    public void Contains(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(assoc {})", "{}")]
+    [DataRow("(assoc {} :a 23)", "{:a 23}")]
+    [DataRow("(assoc { :a 23 })", "{:a 23}")]
+    [DataRow("(assoc { :a 23 } :b 42)", "{:a 23 :b 42}")]
+    [DataRow("(assoc { :a 23 } :b 42 :c 47)", "{:a 23 :b 42 :c 47}")]
+    public void Assoc(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+    [TestMethod]
+    [DataRow("(dissoc {})", "{}")]
+    [DataRow("(dissoc {} :a)", "{}")]
+    [DataRow("(dissoc { :a 23 })", "{:a 23}")]
+    [DataRow("(dissoc { :a 23 } :b)", "{:a 23}")]
+    [DataRow("(dissoc { :a 23 :b 42 } :b)", "{:a 23}")]
+    [DataRow("(dissoc { :a 23 :b 42 } :a :b)", "{}")]
+    [DataRow("(dissoc { :a 23 :b 42 } :a :b :c)", "{}")]
+    public void Dissoc(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(keys {})", "()")]
+    [DataRow("(keys { :a 23 })", "(:a)")]
+    [DataRow("(keys { :a 23 :b 42 })", "(:a :b)")]
+    public void Keys (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(values {})", "()")]
+    [DataRow("(values { :a 23 })", "(23)")]
+    [DataRow("(values { :a 23 :b 42 })", "(23 42)")]
+    public void Values (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    [DataRow("(get {} :a)", "nil")]
+    [DataRow("(get { :a 23 } :a)", "23")]
+    [DataRow("(get { :a 23 :b 42 } :b)", "42")]
+    [DataRow("(get { :a 23 :b 42 } :c)", "nil")]
+    public void Get (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
 }

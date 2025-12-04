@@ -15,6 +15,7 @@ public sealed class TestList
     [DataRow("(* 3 4)", "(* 3 4)")]
     [DataRow("(** 3 4)", "(** 3 4)")]
     [DataRow("(-3 4)", "(-3 4)")]
+    [DataRow("(1 . 2)", "(1 . 2)")]
     public void ReadAndPrint (string input, string expected)
     {
         Assert.AreEqual(expected, LispReader.Read(input).Print(true), "input:<{0}>", input);
@@ -24,6 +25,9 @@ public sealed class TestList
     [DataRow("(1 2")]
     [DataRow(")")]
     [DataRow(") (+ 1 2)")]
+    [DataRow("(1 . . 2)")]
+    [DataRow("(1 . )")]
+    [DataRow("( . 2)")]
     public void UnbalancedParenthesisException(string input)
     {
         Assert.ThrowsException<UnbalancedParenthesisException>(() => LispReader.Read(input).Print(true));
@@ -190,5 +194,18 @@ public sealed class TestList
         var sut = new LispEnvironment();
         sut.ReadEvaluatePrint("(define numbers (list 1 2 3 4 5 6 7 8 9 10))");
         Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+
+    [TestMethod]
+    [DataRow("(contains? '() :a)", "false")]
+    [DataRow("(contains? '(:b) :a)", "false")]
+    [DataRow("(contains? '(:a :b :c) :a)", "true")]
+    [DataRow("(contains? '(:a :b :c) :b)", "true")]
+    [DataRow("(contains? '(:a :b :c) :c)", "true")]
+    [DataRow("(contains? '(:a :b :c) :d)", "false")]
+    public void Contains(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
 }

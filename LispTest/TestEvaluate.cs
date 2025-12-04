@@ -1,5 +1,6 @@
 ﻿using Lisp;
 using Lisp.Parser;
+using Lisp.Types;
 
 namespace LispTest;
 
@@ -76,18 +77,6 @@ public sealed class TestEvaluate
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
 
-    [TestMethod]
-    [DataRow("(+ 1 2)", "3")]
-    [DataRow("(+ 5 (* 2 3))", "11")]
-    [DataRow("(- (+ 5 (* 2 3)) 3)", "8")]
-    [DataRow("(/ (- (+ 5 (* 2 3)) 3) 4)", "2")]
-    [DataRow("(/ (- (+ 515 (* 87 311)) 302) 27)", "1010")]
-    [DataRow("(* -3 6)", "-18")]
-    [DataRow("(/ (- (+ 515 (* -87 311)) 296) 27)", "-994")]
-    public void Arithmetic(string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
 
     [TestMethod]
     [DataRow("(apply + (list 2 3))", "5")]
@@ -109,6 +98,13 @@ public sealed class TestEvaluate
         var sut = new LispEnvironment();
         sut.ReadEvaluatePrint("(define-macro m (lambda [a b] (+ a b)))");
         Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+
+    [TestMethod]
+    public void ApplyTypeMismatchException ()
+    {
+        Assert.ThrowsException<TypeMismatchException<LispPrimitive, LispLambda>>(() => new LispEnvironment().ReadEvaluatePrint("(apply :a '(1 2 3))"));
     }
 
     [TestMethod]

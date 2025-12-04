@@ -41,6 +41,20 @@ public class TestBoolean
     }
 
     [TestMethod]
+    [DataRow("(&& true true)", "true")]
+    [DataRow("(&& true false)", "false")]
+    [DataRow("(&& false true)", "false")]
+    [DataRow("(&& false false)", "false")]
+    [DataRow("(|| true true)", "true")]
+    [DataRow("(|| true false)", "true")]
+    [DataRow("(|| false true)", "true")]
+    [DataRow("(|| false false)", "false")]
+    public void Primitives (string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
     [DataRow("(type-of true)", typeof(LispBool))]
     [DataRow("(type-of false)", typeof(LispBool))]
     public void TypeOf (string input, Type expected)
