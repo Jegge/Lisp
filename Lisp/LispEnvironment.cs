@@ -31,10 +31,10 @@ public sealed class LispEnvironment
         _values = new Dictionary<string, LispValue>
         {
             // Special variables
-            ["argv"] = new LispList(argc.Select(LispValue (a) => new LispString(a))),
-            ["core-version"] = new LispString(Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"),
-            ["DEBUG-EVAL"] = LispValue.Nil,
-            ["access"] = new LispList(Enum.GetValues<LispAccess>()
+            ["*argv*"] = new LispList(argc.Select(LispValue (a) => new LispString(a))),
+            ["*core-version*"] = new LispString(Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"),
+            [LispSymbol.Token.DebugEval] = LispValue.Nil,
+            ["*access*"] = new LispList(Enum.GetValues<LispAccess>()
                                             .Where(f => f > 0 && (int)f < int.MaxValue && access.HasFlag(f))
                                             .Select(LispValue (f) => new LispKeyword(f))
             ),
@@ -46,7 +46,8 @@ public sealed class LispEnvironment
             ["lambda?"] = LispPrimitive.Define("lambda?", (LispEnvironment _, LispValue value) => new LispBool(value is LispApplicable)),
             ["macro?"] = LispPrimitive.Define("macro?", (LispEnvironment _, LispValue value) => new LispBool(value is LispLambda { IsMacro: true })),
             ["throw"] = LispPrimitive.Define("throw", LispValue (LispEnvironment _, LispString message) => throw new RuntimeException(message.Value)),
-
+            ["bound?"] = LispPrimitive.Define("bound?", (LispEnvironment environment, LispSymbol symbol) => new LispBool(symbol.IsBuiltIn || environment.ContainsSymbol(symbol))),
+            
             // Arithmetic operators
             ["+"] = LispPrimitive.Define("+", (lhs, rhs) => lhs + rhs),
             ["-"] = LispPrimitive.Define("-", (lhs, rhs) => lhs - rhs),
@@ -88,7 +89,7 @@ public sealed class LispEnvironment
             // Container (aka List, Vector, Hashmap) functions
             ["null?"] = LispPrimitive.Define("null?", (LispEnvironment _, LispContainer container) => new LispBool(container.Count == 0)),
             ["length"] = LispPrimitive.Define("length", (LispEnvironment _, LispContainer container) => new LispNumber(container.Count)),
-            ["contains?"] = LispPrimitive.Define("contains?", (LispEnvironment _, LispContainer container, LispValue value) => new LispBool(container.Contains(value))),
+            ["member?"] = LispPrimitive.Define("member?", (LispEnvironment _, LispValue value, LispContainer container) => new LispBool(container.Contains(value))),
 
             // Atom functions
             ["atom"] = LispPrimitive.Define("atom", (LispEnvironment _, LispValue value) => new LispAtom(value)),
@@ -104,7 +105,6 @@ public sealed class LispEnvironment
 
             // Hashmap functions
             ["hashmap"] = LispPrimitive.DefineVarArg("hashmap", (_, values) => new LispHashMap(values.TuplesOf<LispValue, LispValue>().ToDictionary())),
-            ["contains-key?"] = LispPrimitive.Define("contains-key?", (LispEnvironment _, LispHashMap hashMap, LispValue key) => new LispBool(hashMap.Values.ContainsKey(key))),
             ["assoc"] = LispPrimitive.DefineVarArg("assoc", (LispEnvironment _, LispHashMap hashMap, LispSequential values) => hashMap.Assoc(values.TuplesOf<LispValue, LispValue>())),
             ["dissoc"] = LispPrimitive.DefineVarArg("dissoc", (LispEnvironment _, LispHashMap hashMap, LispSequential keys) => hashMap.Dissoc(keys.Values)),
             ["keys"] = LispPrimitive.Define("keys", (LispEnvironment _, LispHashMap hashMap) => new LispList(hashMap.Values.Keys)),
@@ -151,9 +151,9 @@ public sealed class LispEnvironment
             ["file-open-write"] = LispPrimitive.Define("file-open-write", (LispEnvironment _, LispString filepath) =>
                 access.HasFlag(LispAccess.WriteFiles) ? new LispIoPort(filepath.Value, FileAccess.Write) : throw new AccessDeniedException(LispAccess.WriteFiles)),
             ["file-close"] = LispPrimitive.Define("file-close", (LispEnvironment _, LispIoPort port) => new LispBool(port.Close())),
-            ["file-read"] =  LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
+            ["file-read"] = LispPrimitive.Define("file-read", (LispEnvironment _, LispIoPort port) =>
                 access.HasFlag(LispAccess.ReadFiles) ? port.Read() is { } s ? new LispString(s) : LispValue.Nil : throw new AccessDeniedException(LispAccess.ReadFiles)),
-            ["file-write"] =  LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) =>
+            ["file-write"] = LispPrimitive.Define("file-write", (LispEnvironment _, LispIoPort port, LispString value) =>
                 !access.HasFlag(LispAccess.WriteFiles) ? throw new AccessDeniedException(LispAccess.WriteFiles) : new LispBool(port.Write(value.Value))),
             ["input-file?"] = LispPrimitive.Define("input-file?", (LispEnvironment _, LispValue value) => new LispBool(value is LispIoPort { Access: FileAccess.Read })),
             ["output-file?"] = LispPrimitive.Define("output-file?", (LispEnvironment _, LispValue value) => new LispBool(value is LispIoPort { Access: FileAccess.Write })),

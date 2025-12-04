@@ -44,7 +44,7 @@ environment.Register("read-json", (LispEnvironment env, LispString content) =>
         element.ValueKind switch
         {
             JsonValueKind.Object => new LispHashMap(element.EnumerateObject()
-                .ToDictionary(LispValue (property) => new LispSymbol(property.Name),
+                .ToDictionary(LispValue (property) => new LispString(property.Name),
                     property => ToLispValue(property.Value))),
             JsonValueKind.Array => new LispVector(element.EnumerateArray().Select(ToLispValue)),
             JsonValueKind.String => (element.GetString() ?? string.Empty) switch

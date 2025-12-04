@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Lisp.Parser;
 
 namespace Lisp.Types;
 
@@ -18,7 +17,7 @@ public abstract class LispValue
         while (true)
         {
             if (environment[LispSymbol.DebugEval] is not (LispNil or LispBool { Value: false }))
-                Trace.WriteLine($"EVAL: {value.Print(false)}");
+                Trace.WriteLine($"E: {value.Print(false)}");
 
             switch (value)
             {
@@ -33,28 +32,6 @@ public abstract class LispValue
 
                 case LispList { Values: [] } list:
                     return list;
-
-                // Special form: bound?
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.BoundP } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Try } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Catch } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Quote } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Quasiquote } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.SpliceUnquote } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Unquote } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Do } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Let } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.If } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.Define } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispSymbol.Token.DefineMacro } ]}:
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol { Value: LispLambda.Token } ]}:
-                    return new LispBool(true);
-
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, LispSymbol symbol ]}:
-                    return new LispBool(environment.ContainsSymbol(symbol));
-
-                case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.BoundP }, .. ]} list:
-                    throw new BadFormException(list);
 
                 // Special form: try / catch
                 case LispList { Values: [ LispSymbol { Value: LispSymbol.Token.Try }, { } tryValue, LispList { Values: [LispSymbol { Value: LispSymbol.Token.Catch }, LispSymbol catchBinding, { } catchValue] } ] }:
@@ -171,10 +148,13 @@ public abstract class LispValue
                 case LispList { Values: [LispSymbol { Value: LispLambda.Token }, ..] } list:
                     throw new BadFormException(list);
 
-                // Application
+                // Function application
                 case LispList list:
                     if (list.Values.First().Eval(environment) is not LispApplicable applicable)
                         throw new BadFormException(list);
+
+                    if (environment[LispSymbol.DebugEval] is not (LispNil or LispBool { Value: false }))
+                        Trace.WriteLine($"A: {applicable.Print(false)}");
 
                     switch (applicable)
                     {

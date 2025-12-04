@@ -5,6 +5,28 @@ namespace LispTest;
 [TestClass]
 public sealed class TestSpecialForms
 {
+
+    [TestMethod]
+    [DataRow("(bound? 'abc)", "false")]
+    [DataRow("(bound? 'quote)", "true")]
+    [DataRow("(bound? 'quasiquote)", "true")]
+    [DataRow("(bound? 'unquote)", "false")]
+    [DataRow("(bound? 'splice-unquote)", "false")]
+    [DataRow("(bound? 'deref)", "true")]
+    [DataRow("(bound? 'if)", "true")]
+    [DataRow("(bound? 'let)", "true")]
+    [DataRow("(bound? 'do)", "true")]
+    [DataRow("(bound? 'define)", "true")]
+    [DataRow("(bound? 'define-macro)", "true")]
+    [DataRow("(bound? 'lambda)", "true")]
+    [DataRow("(bound? 'def)", "true")]
+    public void Bound (string input, string expected)
+    {
+        var sut = new LispEnvironment();
+        sut.ReadEvaluatePrint("(define def 42)");
+        Assert.AreEqual(expected, sut.ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
     [TestMethod]
     [DataRow("(if true 7 8)", "7")]
     [DataRow("(if false 7 8)", "8")]

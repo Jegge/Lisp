@@ -180,8 +180,8 @@ public sealed class TestEvaluate
     [TestMethod]
     public void CommandLineArguments ()
     {
-        Assert.AreEqual("()", new LispEnvironment().ReadEvaluatePrint("argv"));
-        Assert.AreEqual("(\"foo\")", new LispEnvironment(["foo"]).ReadEvaluatePrint("argv"));
-        Assert.AreEqual("(\"foo\" \"bar\")", new LispEnvironment(["foo", "bar"]).ReadEvaluatePrint("argv"));
+        Assert.AreEqual("()", new LispEnvironment().ReadEvaluatePrint("*argv*"));
+        Assert.AreEqual("(\"foo\")", new LispEnvironment(["foo"]).ReadEvaluatePrint("*argv*"));
+        Assert.AreEqual("(\"foo\" \"bar\")", new LispEnvironment(["foo", "bar"]).ReadEvaluatePrint("*argv*"));
     }
 }

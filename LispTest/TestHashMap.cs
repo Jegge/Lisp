@@ -102,20 +102,11 @@ public sealed class TestHashMap
     }
 
     [TestMethod]
-    [DataRow("(contains-key? {} :a)", "false")]
-    [DataRow("(contains-key? { :b 23 } :a)", "false")]
-    [DataRow("(contains-key? { :b 23 } :b)", "true")]
-    public void ContainsKey (string input, string expected)
-    {
-        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
-    }
-
-    [TestMethod]
-    [DataRow("(contains? {} :a)", "false")]
-    [DataRow("(contains? { :b 23 } :a)", "false")]
-    [DataRow("(contains? { :b 23 } :b)", "false")]
-    [DataRow("(contains? { :b 23 } 23)", "true")]
-    public void Contains(string input, string expected)
+    [DataRow("(member? :a {})", "false")]
+    [DataRow("(member? :a { :b 23 })", "false")]
+    [DataRow("(member? :b { :b 23 })", "true")]
+    [DataRow("(member? 23 { :b 23 })", "false")]
+    public void Member (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }

@@ -14,7 +14,7 @@ public sealed class LispHashMap(IDictionary<LispValue,LispValue> value) : LispCo
     }
     public IDictionary<LispValue,LispValue> Values { get; } = value;
     public override int Count => Values.Count;
-    public override bool Contains (LispValue value) => Values.Values.Contains(value);
+    public override bool Contains (LispValue value) => Values.ContainsKey(value);
 
     public LispHashMap Assoc (IEnumerable<(LispValue, LispValue)> values)
     {

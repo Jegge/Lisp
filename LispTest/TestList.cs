@@ -198,13 +198,13 @@ public sealed class TestList
 
 
     [TestMethod]
-    [DataRow("(contains? '() :a)", "false")]
-    [DataRow("(contains? '(:b) :a)", "false")]
-    [DataRow("(contains? '(:a :b :c) :a)", "true")]
-    [DataRow("(contains? '(:a :b :c) :b)", "true")]
-    [DataRow("(contains? '(:a :b :c) :c)", "true")]
-    [DataRow("(contains? '(:a :b :c) :d)", "false")]
-    public void Contains(string input, string expected)
+    [DataRow("(member? :a '())", "false")]
+    [DataRow("(member? :a '(:b))", "false")]
+    [DataRow("(member? :a '(:a :b :c))", "true")]
+    [DataRow("(member? :b '(:a :b :c))", "true")]
+    [DataRow("(member? :c '(:a :b :c))", "true")]
+    [DataRow("(member? :d '(:a :b :c))", "false")]
+    public void Member (string input, string expected)
     {
         Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
     }
