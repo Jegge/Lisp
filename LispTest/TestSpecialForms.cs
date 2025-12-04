@@ -139,4 +139,71 @@ public sealed class TestSpecialForms
         foreach (var (i, e) in input.Zip(expected))
             Assert.AreEqual(e, sut.ReadEvaluatePrint(i), "input:<{0}>", i);
     }
+
+    [TestMethod]
+    [DataRow("(try 123 (catch e 456))", "123")]
+    [DataRow("(try abc (catch e 456))", "456")]
+    [DataRow("(try (list 1) (catch e (prn \"exc is:\" e)))", "(1)")]
+    [DataRow("(try (throw \"my exception\") (catch e (do e 7)))", "7")]
+    [DataRow("(try (throw \"my exception\") (catch e \"blubb\"))", "\"blubb\"")]
+    [DataRow("(try (do (try \"t1\" (catch e \"c1\")) (throw \"e1\")) (catch e \"c2\"))", "\"c2\"")]
+    [DataRow("(try (try (throw \"e1\") (catch e (throw \"e2\"))) (catch e \"c2\"))", "\"c2\"")]
+    [DataRow("(try (map throw (list \"my err\")) (catch exc exc))", "\"Runtime error: my err.\"")]
+    //[DataRow("", "")]
+
+    public void TryCatch(string input, string expected)
+    {
+        Assert.AreEqual(expected, new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
+
+    [TestMethod]
+    public void Throw()
+    {
+        Assert.ThrowsException<RuntimeException>(() => new LispEnvironment().ReadEvaluatePrint("(throw \"test\")"));
+    }
+
+    [TestMethod]
+    [DataRow("(try)")]
+    [DataRow("(try catch)")]
+    [DataRow("(try '() catch)")]
+    [DataRow("(try '() 'abc)")]
+    [DataRow("(try '() (catch))")]
+    [DataRow("(try '() (catch x))")]
+    [DataRow("(try '() ('abc x 2))")]
+    [DataRow("(quote)")]
+    [DataRow("(quote a b)")]
+    [DataRow("(quasiquote)")]
+    [DataRow("(quasiquote a b)")]
+    [DataRow("(do)")]
+    [DataRow("(let)")]
+    [DataRow("(let 2 'b)")]
+    [DataRow("(let '())")]
+    [DataRow("(let '() a b)")]
+    [DataRow("(if)")]
+    [DataRow("(if 1 2 3 4)")]
+    [DataRow("(define)")]
+    [DataRow("(define 2 2)")]
+    [DataRow("(define () ())")]
+    [DataRow("(define ())")]
+    [DataRow("(define (x . y))")]
+    [DataRow("(define () 2 3)")]
+    [DataRow("(define (x . y) 2 3)")]
+    [DataRow("(define-macro)")]
+    [DataRow("(define-macro 2 2)")]
+    [DataRow("(define-macro a 2)")]
+    [DataRow("(define-macro () ())")]
+    [DataRow("(define-macro x (+ 2 3) 4)")]
+    [DataRow("(lambda)")]
+    [DataRow("(lambda 2)")]
+    [DataRow("(lambda a)")]
+    [DataRow("(lambda (x . y))")]
+    [DataRow("(lambda ())")]
+    [DataRow("(lambda a 2 2)")]
+    [DataRow("(lambda (x . y) 2 2)")]
+    [DataRow("(lambda () 2 2)")]
+    [DataRow("(2)")]
+    public void BadFormException (string input)
+    {
+        Assert.ThrowsException<BadFormException>(() => new LispEnvironment().ReadEvaluatePrint(input), "input:<{0}>", input);
+    }
 }
